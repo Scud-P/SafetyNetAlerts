@@ -3,7 +3,7 @@ package com.oc.safetynet.alertsapi.model;
 import java.time.LocalDate;
 import java.util.List;
 
-public class MedicalRecords {
+public class MedicalRecord {
 
     public String getFirstName() {
         return firstName;

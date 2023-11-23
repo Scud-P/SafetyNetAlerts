@@ -1,6 +1,24 @@
 package com.oc.safetynet.alertsapi.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Person {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    private int id;
+    private String firstName;
+    private String lastName;
+    private String address;
+    private String city;
+    private String zip;
+    private String phone;
+    private String email;
 
     public String getFirstName() {
         return firstName;
@@ -11,11 +29,11 @@ public class Person {
     }
 
     public String getLastName() {
-        return LastName;
+        return lastName;
     }
 
     public void setLastName(String lastName) {
-        LastName = lastName;
+        this.lastName = lastName;
     }
 
     public String getAddress() {
@@ -58,12 +76,9 @@ public class Person {
         this.email = email;
     }
 
-    private String firstName;
-    private String LastName;
-    private String address;
-    private String city;
-    private String zip;
-    private String phone;
-    private String email;
+    public int getId() {
+        return id;
+    }
+
 
 }
