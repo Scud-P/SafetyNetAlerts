@@ -26,4 +26,9 @@ public class PersonController {
     public List<Person> addAllPersons(@RequestBody List<Person> persons) {
         return personService.saveAllPersons(persons);
     }
+
+    @PostMapping("/populate")
+    public void populatePersonsTable() {
+        personService.populatePersonTable();
+    }
 }

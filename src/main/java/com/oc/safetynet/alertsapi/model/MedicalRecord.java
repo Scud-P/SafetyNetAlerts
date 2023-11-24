@@ -1,9 +1,23 @@
 package com.oc.safetynet.alertsapi.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+
 import java.time.LocalDate;
 import java.util.List;
 
+@Entity
 public class MedicalRecord {
+
+    @Id
+    @GeneratedValue
+    private long id;
+    private String firstName;
+    private String lastName;
+    private LocalDate birthdate;
+    private List<String> medications;
+    private List<String> allergies;
 
     public String getFirstName() {
         return firstName;
@@ -45,10 +59,11 @@ public class MedicalRecord {
         this.allergies = allergies;
     }
 
-    private String firstName;
-    private String lastName;
-    private LocalDate birthdate;
-    private List<String> medications;
-    private List<String> allergies;
+    public long getId() {
+        return id;
+    }
+    public void setId(long id) {
+        this.id = id;
+    }
 
 }

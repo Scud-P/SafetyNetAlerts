@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS persons;
 
-CREATE TABLE persons (
+CREATE TABLE "persons" (
   id INT AUTO_INCREMENT  PRIMARY KEY,
   firstName VARCHAR(250) NOT NULL,
   lastName VARCHAR(250) NOT NULL,
@@ -9,4 +9,17 @@ CREATE TABLE persons (
   zip VARCHAR(250) NOT NULL,
   phone VARCHAR(250) NOT NULL,
   email VARCHAR(250) NOT NULL
+);
+
+CREATE TABLE "medicalRecords" (
+  id INT AUTO_INCREMENT  PRIMARY KEY,
+  firstName VARCHAR(250) NOT NULL,
+  lastName VARCHAR(250) NOT NULL,
+  birthdate VARCHAR(250) NOT NULL
+);
+
+CREATE TABLE "fireStations" (
+id INT AUTO_INCREMENT  PRIMARY KEY,
+address VARCHAR(250) NOT NULL,
+station INT NOT NULL
 );

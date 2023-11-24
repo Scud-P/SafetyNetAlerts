@@ -1,14 +1,24 @@
 package com.oc.safetynet.alertsapi.view;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.oc.safetynet.alertsapi.controller.FireStationController;
+import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
 import com.oc.safetynet.alertsapi.controller.PersonController;
 import com.oc.safetynet.alertsapi.model.Data;
+import com.oc.safetynet.alertsapi.model.FireStation;
+import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
+import com.oc.safetynet.alertsapi.service.JsonDataService;
+import com.oc.safetynet.alertsapi.service.PersonService;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 import java.io.IOException;
@@ -20,6 +30,14 @@ public class ConsoleView implements CommandLineRunner {
 
     @Autowired
     PersonController personController;
+    @Autowired
+    MedicalRecordController medicalRecordController;
+    @Autowired
+    FireStationController fireStationController;
+    @Autowired
+    JsonDataService jsonDataService;
+    @Autowired
+    ObjectMapper objectMapper;
 
 
     @Override
@@ -47,16 +65,22 @@ public class ConsoleView implements CommandLineRunner {
     }
 
     private void populateDB() {
-        ObjectMapper objectMapper = new ObjectMapper();
+        Data data = new Data();
+        JSONObject jsonObject = jsonDataService.findDataArrays();
 
-        try {
-            InputStream inputStream = getClass().getResourceAsStream("/data.json");
-            Data data = objectMapper.readValue(inputStream, Data.class);
-            List<Person> persons = data.getPersons();
-            personController.addAllPersons(persons);
-            System.out.println("DB populated!");
-        } catch(IOException e) {
-            System.out.println("Error reading data from JSON file" + e.getMessage());
+        if (jsonObject != null) {
+            try {
+                data = objectMapper.readValue(jsonObject.toString(), Data.class);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+
+            personController.populatePersonsTable();
+            System.out.println("Persons table populated!");
+
+            fireStationController.populateFireStationTable();
+            System.out.println("FireStations table populated!");
+
         }
     }
 }
