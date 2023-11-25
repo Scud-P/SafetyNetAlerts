@@ -30,4 +30,9 @@ public class MedicalRecordController {
         return medicalRecordService.saveAllMedicalRecords(medicalRecords);
     }
 
+    @PostMapping("/populate")
+    public void populateMedicalRecordsTable() {
+        medicalRecordService.populateMedicalRecordsTable();
+    }
+
 }

@@ -81,6 +81,9 @@ public class ConsoleView implements CommandLineRunner {
             fireStationController.populateFireStationTable();
             System.out.println("FireStations table populated!");
 
+            medicalRecordController.populateMedicalRecordsTable();
+            System.out.println("MedicalRecords table populated!");
         }
+        System.out.println("...All tables populated!");
     }
 }
