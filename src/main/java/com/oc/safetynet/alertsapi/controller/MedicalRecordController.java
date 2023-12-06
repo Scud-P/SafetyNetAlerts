@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/medicalrecords")
+@RequestMapping("/medicalrecords")
 public class MedicalRecordController {
 
     @Autowired
@@ -29,10 +29,4 @@ public class MedicalRecordController {
     public List<MedicalRecord> addAllMedicalRecords(@RequestBody List<MedicalRecord> medicalRecords) {
         return medicalRecordService.saveAllMedicalRecords(medicalRecords);
     }
-
-    @PostMapping("/populate")
-    public void populateMedicalRecordsTable() {
-        medicalRecordService.populateMedicalRecordsTable();
-    }
-
 }

@@ -1,42 +1,33 @@
 package com.oc.safetynet.alertsapi.service;
 
+import com.oc.safetynet.alertsapi.model.FireStation;
+import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
+import com.oc.safetynet.alertsapi.model.dto.PersonsWithMinorCount;
+import com.oc.safetynet.alertsapi.repository.FireStationRepository;
+import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import com.oc.safetynet.alertsapi.repository.PersonRepository;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Data
 public class PersonService {
     @Autowired
     private PersonRepository personRepository;
-    @Autowired
-    private JsonDataService jsonDataService;
 
-    public void populatePersonTable() {
-        JSONObject data = jsonDataService.findDataArrays();
-        if(data !=null) {
-            JSONArray personsArray = data.getJSONArray("persons");
-            List<Person> persons = new ArrayList<>();
-            for (int i = 0; i < personsArray.length(); i++) {
-                JSONObject personJson = personsArray.getJSONObject(i);
-                Person person = new Person();
-                person.setFirstName(personJson.getString("firstName"));
-                person.setLastName(personJson.getString("lastName"));
-                person.setAddress(personJson.getString("address"));
-                person.setCity(personJson.getString("city"));
-                person.setZip(personJson.getString("zip"));
-                person.setPhone(personJson.getString("phone"));
-                person.setEmail(personJson.getString("email"));
-                persons.add(person);
-            }
-            personRepository.saveAll(persons);
-        }
-    }
+    @Autowired
+    private FireStationRepository fireStationRepository;
+
+    @Autowired
+    private MedicalRecordRepository medicalRecordRepository;
 
     public List<Person> getAllPersons() {
         return personRepository.findAll();
@@ -48,5 +39,54 @@ public class PersonService {
 
     public List<Person> saveAllPersons(List<Person> persons) {
         return personRepository.saveAll(persons);
+    }
+
+    public List<Person> getPersonsByStation(int station) {
+        List<FireStation> fireStations = fireStationRepository.findByStation(station);
+        List<Person> persons = new ArrayList<>();
+        if (fireStations != null) {
+            for (FireStation fireStation : fireStations) {
+                persons.addAll(personRepository.findAll().stream()
+                        .filter(person -> person.getAddress().equals(fireStation.getAddress())).toList());
+            }
+        }
+        return persons;
+    }
+
+    public List<Person> determineMinors(List<Person> persons) {
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll();
+        LocalDate now = LocalDate.now();
+        LocalDate majorityDate = now.minusYears(18);
+
+        return persons.stream()
+                .filter(person -> medicalRecords.stream()
+                        .anyMatch(medicalRecord ->
+                                person.getFirstName().equals(medicalRecord.getFirstName()) &&
+                                        person.getLastName().equals(medicalRecord.getLastName()) &&
+                                        medicalRecord.getBirthdate().isAfter(majorityDate)))
+                .collect(Collectors.toList());
+    }
+
+    public List<Person> getPersonsByStationWithMinors (int station) {
+        List<Person> personsByStation = getPersonsByStation(station);
+        List<Person> minors = determineMinors(personsByStation);
+        personsByStation.forEach(person -> person.setMinor(minors.contains(person)));
+        return personsByStation;
+    }
+
+    public PersonsWithMinorCount getPersonsByStationWithMinorsAndCount (int station) {
+        List<Person> personsByStation = getPersonsByStationWithMinors(station);
+        List<Person> minors = determineMinors(personsByStation);
+
+        long minorsCount = minors.stream().filter(Person::isMinor).count();
+        long majorsCount = personsByStation.size() - minorsCount;
+
+        PersonsWithMinorCount personsWithMinorCount = new PersonsWithMinorCount();
+
+        personsWithMinorCount.setPersons(personsByStation);
+        personsWithMinorCount.setMinorsCount((int)minorsCount);
+        personsWithMinorCount.setMajorsCount((int)majorsCount);
+
+        return personsWithMinorCount;
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/firestations")
+@RequestMapping("/stations")
 public class FireStationController {
 
     @Autowired
@@ -28,10 +28,10 @@ public class FireStationController {
     public List<FireStation> addAllFireStations(@RequestBody List<FireStation> fireStations) {
         return fireStationService.saveAllFireStations(fireStations);
     }
-
-    @PostMapping("/populate")
-    public void populateFireStationTable() {
-        fireStationService.populateFireStationTable();
-    }
+//
+//    @PostMapping("/populate")
+//    public void populateFireStationTable() {
+//        fireStationService.populateFireStationTable();
+//    }
 
 }

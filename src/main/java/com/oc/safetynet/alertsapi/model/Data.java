@@ -1,15 +1,13 @@
 package com.oc.safetynet.alertsapi.model;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.ToString;
 
 import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-
+@ToString
 public class Data {
     private List<Person> persons;
-    private List<FireStation> fireStations;
-    private List<MedicalRecord> medicalRecords;
+    private List<FireStation> firestations;
+    private List<MedicalRecord> medicalrecords;
 
     public List<Person> getPersons() {
         return persons;
@@ -19,19 +17,19 @@ public class Data {
         this.persons = persons;
     }
 
-    public List<FireStation> getFireStations() {
-        return fireStations;
+    public List<FireStation> getFirestations() {
+        return firestations;
     }
 
     public void setFireStations(List<FireStation> fireStations) {
-        this.fireStations = fireStations;
+        this.firestations = fireStations;
     }
 
-    public List<MedicalRecord> getMedicalRecords() {
-        return medicalRecords;
+    public List<MedicalRecord> getMedicalrecords() {
+        return medicalrecords;
     }
 
-    public void setMedicalRecords(List<MedicalRecord> medicalRecords) {
-        this.medicalRecords = medicalRecords;
+    public void setMedicalrecords(List<MedicalRecord> medicalrecords) {
+        this.medicalrecords = medicalrecords;
     }
 }

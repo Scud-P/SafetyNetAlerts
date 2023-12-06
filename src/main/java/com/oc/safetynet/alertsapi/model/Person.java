@@ -4,13 +4,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.ToString;
 
 @Entity
+@ToString
 public class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private long id;
     private String firstName;
     private String lastName;
@@ -19,6 +20,17 @@ public class Person {
     private String zip;
     private String phone;
     private String email;
+
+    private boolean isMinor;
+
+    public boolean isMinor() {
+        return isMinor;
+    }
+
+    public void setMinor(boolean minor) {
+        isMinor = minor;
+    }
+
 
     public String getFirstName() {
         return firstName;

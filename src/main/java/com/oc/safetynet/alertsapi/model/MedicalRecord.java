@@ -3,11 +3,14 @@ package com.oc.safetynet.alertsapi.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Entity
+@ToString
 public class MedicalRecord {
 
     @Id
@@ -41,6 +44,11 @@ public class MedicalRecord {
 
     public void setBirthdate(LocalDate birthdate) {
         this.birthdate = birthdate;
+    }
+
+    public void setBirthdate(String birthdate) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        this.birthdate = LocalDate.parse(birthdate, dateTimeFormatter);
     }
 
     public List<String> getMedications() {
