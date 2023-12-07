@@ -10,11 +10,11 @@ import com.oc.safetynet.alertsapi.repository.PersonRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,6 +67,26 @@ public class PersonService {
                 .collect(Collectors.toList());
     }
 
+    public List<Person> setAge(List<Person> persons) {
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll();
+        LocalDate now = LocalDate.now();
+
+        return persons.stream()
+                .peek(person -> {
+                    Optional<MedicalRecord> matchingMedicalRecord = medicalRecords.stream()
+                            .filter(medicalRecord ->
+                                    person.getFirstName().equals(medicalRecord.getFirstName()) &&
+                                    person.getLastName().equals(medicalRecord.getLastName()))
+                            .findFirst();
+                    matchingMedicalRecord.ifPresent(medicalRecord ->  {
+                        LocalDate birthdate = medicalRecord.getBirthdate();
+                        int age = Period.between(birthdate, now).getYears();
+                        person.setAge(age);
+                    });
+                })
+                .collect(Collectors.toList());
+    }
+
     public List<Person> getPersonsByStationWithMinors (int station) {
         List<Person> personsByStation = getPersonsByStation(station);
         List<Person> minors = determineMinors(personsByStation);
@@ -88,5 +108,13 @@ public class PersonService {
         personsWithMinorCount.setMajorsCount((int)majorsCount);
 
         return personsWithMinorCount;
+    }
+
+    public List<Person> getMinorsByAddress(String address) {
+        List<Person> persons = personRepository.findByAddress(address);
+        List<Person> personsWithAge = setAge(persons);
+        List<Person> minors = determineMinors(personsWithAge);
+        minors.forEach(person -> person.setMinor(minors.contains(person)));
+        return minors;
     }
 }
