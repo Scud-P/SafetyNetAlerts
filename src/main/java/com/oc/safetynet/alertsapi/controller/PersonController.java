@@ -46,8 +46,8 @@ public class PersonController {
         return personService.saveAllPersons(persons);
     }
     @GetMapping(value = "/phoneAlert", params = "firestation")
-    public List<String> getPhoneNumbers(@RequestParam(name = "firestation") int station) {
-        return personService.getPhoneNumbersByStation(station);
+    public List<String> getPhonesByStation(@RequestParam(name = "firestation") int station) {
+        return personService.findPhonesByStation(station);
     }
 
 }

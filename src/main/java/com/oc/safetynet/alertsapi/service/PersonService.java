@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -138,4 +136,12 @@ public class PersonService {
         return minors;
     }
 
+    public List<String> findPhonesByStation(int station) {
+        List<String> addresses = fireStationRepository.findAddressesByStation(station);
+        return addresses.stream()
+                .map(address -> personRepository.findPhoneByAddress(address))
+                .flatMap(List::stream)
+                .distinct()
+                .toList();
+    }
 }
