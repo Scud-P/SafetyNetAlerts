@@ -7,7 +7,10 @@ import com.oc.safetynet.alertsapi.model.dto.PersonsWithMinorCount;
 import com.oc.safetynet.alertsapi.repository.FireStationRepository;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import com.oc.safetynet.alertsapi.repository.PersonRepository;
+import com.oc.safetynet.alertsapi.view.ConsoleView;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -20,6 +23,9 @@ import java.util.stream.Collectors;
 @Service
 @Data
 public class PersonService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
+
     @Autowired
     private PersonRepository personRepository;
 
@@ -50,7 +56,19 @@ public class PersonService {
                         .filter(person -> person.getAddress().equals(fireStation.getAddress())).toList());
             }
         }
+        logger.info("Content of Persons : {}", persons);
         return persons;
+    }
+
+    public List<String> getPhoneNumbersByStation(int station) {
+        List<Person> persons = getPersonsByStation(station);
+        if(persons != null) {
+            return persons.stream()
+                    .map(Person::getPhone)
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 
     public List<Person> determineMinors(List<Person> persons) {
@@ -91,6 +109,7 @@ public class PersonService {
         List<Person> personsByStation = getPersonsByStation(station);
         List<Person> minors = determineMinors(personsByStation);
         personsByStation.forEach(person -> person.setMinor(minors.contains(person)));
+        logger.info("Content of Persons by Station with Minors : {}", personsByStation);
         return personsByStation;
     }
 
@@ -107,6 +126,7 @@ public class PersonService {
         personsWithMinorCount.setMinorsCount((int)minorsCount);
         personsWithMinorCount.setMajorsCount((int)majorsCount);
 
+        logger.info("Content of Persons with Minors and MinorsCount : {}", personsWithMinorCount);
         return personsWithMinorCount;
     }
 
@@ -117,4 +137,5 @@ public class PersonService {
         minors.forEach(person -> person.setMinor(minors.contains(person)));
         return minors;
     }
+
 }

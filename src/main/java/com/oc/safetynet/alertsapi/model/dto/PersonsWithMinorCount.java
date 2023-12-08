@@ -1,10 +1,8 @@
 package com.oc.safetynet.alertsapi.model.dto;
 
 import com.oc.safetynet.alertsapi.model.Person;
-import jakarta.persistence.Entity;
 
 import java.util.List;
-
 
 public class PersonsWithMinorCount {
 

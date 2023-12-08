@@ -26,13 +26,11 @@ public class PersonController {
     }
 
     @GetMapping(value = "/firestation", params = "stationNumber")
-    @JsonView(Views.ChildAlert.class)
     public PersonsWithMinorCount getPersonsByStation(@RequestParam(name = "stationNumber") int station) {
         return personService.getPersonsByStationWithMinorsAndCount(station);
     }
 
     @GetMapping(value = "/childAlert", params = "address")
-    @JsonView(Views.ChildAlert.class)
     public List<Person> getAllMinorsAtAddress(@RequestParam(name = "address") String address) {
         return personService.getMinorsByAddress(address);
     }
@@ -47,4 +45,9 @@ public class PersonController {
     public List<Person> addAllPersons(@RequestBody List<Person> persons) {
         return personService.saveAllPersons(persons);
     }
+    @GetMapping(value = "/phoneAlert", params = "firestation")
+    public List<String> getPhoneNumbers(@RequestParam(name = "firestation") int station) {
+        return personService.getPhoneNumbersByStation(station);
+    }
+
 }

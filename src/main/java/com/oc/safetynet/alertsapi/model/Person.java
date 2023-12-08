@@ -16,19 +16,16 @@ public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @JsonView(Views.ChildAlert.class)
+
+
     private String firstName;
-    @JsonView(Views.ChildAlert.class)
+
     private String lastName;
-
     private String address;
-
     private String city;
-
     private String zip;
     private String phone;
     private String email;
-    @JsonView(Views.ChildAlert.class)
     private int age;
     private boolean isMinor;
 
