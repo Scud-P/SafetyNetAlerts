@@ -1,11 +1,15 @@
 package com.oc.safetynet.alertsapi.model.dto;
 
-public class PersonDTO {
+import com.oc.safetynet.alertsapi.model.Person;
+
+import java.util.List;
+
+public class ChildDTO {
 
     private String firstName;
     private String lastName;
-    private String address;
-    private String phone;
+    private int age;
+    List<Person> familyMembers;
 
     public String getFirstName() {
         return firstName;
@@ -23,20 +27,20 @@ public class PersonDTO {
         this.lastName = lastName;
     }
 
-    public String getAddress() {
-        return address;
+    public int getAge() {
+        return age;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setAge(int age) {
+        this.age = age;
     }
 
-    public String getPhone() {
-        return phone;
+    public List<Person> getFamilyMembers() {
+        return familyMembers;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setFamilyMembers(List<Person> familyMembers) {
+        this.familyMembers = familyMembers;
     }
 
 }

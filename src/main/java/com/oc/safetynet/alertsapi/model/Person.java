@@ -26,24 +26,6 @@ public class Person {
     private String zip;
     private String phone;
     private String email;
-    private int age;
-    private boolean isMinor;
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public boolean isMinor() {
-        return isMinor;
-    }
-
-    public void setMinor(boolean minor) {
-        isMinor = minor;
-    }
 
     public String getFirstName() {
         return firstName;

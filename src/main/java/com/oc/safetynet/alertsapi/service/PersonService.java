@@ -3,20 +3,25 @@ package com.oc.safetynet.alertsapi.service;
 import com.oc.safetynet.alertsapi.model.FireStation;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
-import com.oc.safetynet.alertsapi.model.dto.PersonsWithMinorCount;
+import com.oc.safetynet.alertsapi.model.dto.ChildDTO;
+import com.oc.safetynet.alertsapi.model.dto.PersonDTO;
+import com.oc.safetynet.alertsapi.model.dto.PersonWithCountDTO;
 import com.oc.safetynet.alertsapi.repository.FireStationRepository;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import com.oc.safetynet.alertsapi.repository.PersonRepository;
-import com.oc.safetynet.alertsapi.view.ConsoleView;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 @Service
 @Data
@@ -58,84 +63,6 @@ public class PersonService {
         return persons;
     }
 
-    public List<String> getPhoneNumbersByStation(int station) {
-        List<Person> persons = getPersonsByStation(station);
-        if(persons != null) {
-            return persons.stream()
-                    .map(Person::getPhone)
-                    .distinct()
-                    .collect(Collectors.toList());
-        }
-        return null;
-    }
-
-    public List<Person> determineMinors(List<Person> persons) {
-        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll();
-        LocalDate now = LocalDate.now();
-        LocalDate majorityDate = now.minusYears(18);
-
-        return persons.stream()
-                .filter(person -> medicalRecords.stream()
-                        .anyMatch(medicalRecord ->
-                                person.getFirstName().equals(medicalRecord.getFirstName()) &&
-                                        person.getLastName().equals(medicalRecord.getLastName()) &&
-                                        medicalRecord.getBirthdate().isAfter(majorityDate)))
-                .collect(Collectors.toList());
-    }
-
-    public List<Person> setAge(List<Person> persons) {
-        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll();
-        LocalDate now = LocalDate.now();
-
-        return persons.stream()
-                .peek(person -> {
-                    Optional<MedicalRecord> matchingMedicalRecord = medicalRecords.stream()
-                            .filter(medicalRecord ->
-                                    person.getFirstName().equals(medicalRecord.getFirstName()) &&
-                                    person.getLastName().equals(medicalRecord.getLastName()))
-                            .findFirst();
-                    matchingMedicalRecord.ifPresent(medicalRecord ->  {
-                        LocalDate birthdate = medicalRecord.getBirthdate();
-                        int age = Period.between(birthdate, now).getYears();
-                        person.setAge(age);
-                    });
-                })
-                .collect(Collectors.toList());
-    }
-
-    public List<Person> getPersonsByStationWithMinors (int station) {
-        List<Person> personsByStation = getPersonsByStation(station);
-        List<Person> minors = determineMinors(personsByStation);
-        personsByStation.forEach(person -> person.setMinor(minors.contains(person)));
-        logger.info("Content of Persons by Station with Minors : {}", personsByStation);
-        return personsByStation;
-    }
-
-    public PersonsWithMinorCount getPersonsByStationWithMinorsAndCount (int station) {
-        List<Person> personsByStation = getPersonsByStationWithMinors(station);
-        List<Person> minors = determineMinors(personsByStation);
-
-        long minorsCount = minors.stream().filter(Person::isMinor).count();
-        long majorsCount = personsByStation.size() - minorsCount;
-
-        PersonsWithMinorCount personsWithMinorCount = new PersonsWithMinorCount();
-
-        personsWithMinorCount.setPersons(personsByStation);
-        personsWithMinorCount.setMinorsCount((int)minorsCount);
-        personsWithMinorCount.setMajorsCount((int)majorsCount);
-
-        logger.info("Content of Persons with Minors and MinorsCount : {}", personsWithMinorCount);
-        return personsWithMinorCount;
-    }
-
-    public List<Person> getMinorsByAddress(String address) {
-        List<Person> persons = personRepository.findByAddress(address);
-        List<Person> personsWithAge = setAge(persons);
-        List<Person> minors = determineMinors(personsWithAge);
-        minors.forEach(person -> person.setMinor(minors.contains(person)));
-        return minors;
-    }
-
     public List<String> findPhonesByStation(int station) {
         List<String> addresses = fireStationRepository.findAddressesByStation(station);
         return addresses.stream()
@@ -144,4 +71,98 @@ public class PersonService {
                 .distinct()
                 .toList();
     }
+
+    public List<ChildDTO> findMinorsAtAddress(String address) {
+        LocalDate now = LocalDate.now();
+        LocalDate eighteenYearsAgo = now.minusYears(18);
+
+        List<MedicalRecord> minorsRecord = medicalRecordRepository.findByBirthdateAfter(eighteenYearsAgo);
+        List<Person> minorsAtAddress = minorsRecord.stream()
+                .flatMap(medicalRecord -> findMatchingPersons(medicalRecord, address).stream())
+                .distinct().toList();
+
+        List<Person> familyMembers = personRepository.findByAddress(address);
+        familyMembers.removeIf(minorsAtAddress::contains);
+
+        List<ChildDTO> minorsAtAddressDTO = minorsAtAddress.stream()
+                .map(person -> {
+                    ChildDTO childDTO = new ChildDTO();
+                    childDTO.setFirstName(person.getFirstName());
+                    childDTO.setLastName(person.getLastName());
+                    childDTO.setFamilyMembers(familyMembers);
+
+                    MedicalRecord matchingMedicalRecord = findMatchingMedicalRecord(person, minorsRecord);
+                    int age = calculateAge(matchingMedicalRecord.getBirthdate());
+                    childDTO.setAge(age);
+
+                    return childDTO;
+                })
+                .toList();
+
+        return minorsAtAddressDTO;
+    }
+
+    public PersonWithCountDTO findPersonsByStation(int station) {
+        List<String> addresses = fireStationRepository.findAddressesByStation(station);
+
+        List<PersonDTO> personDTOs = addresses.stream()
+                .flatMap(address -> personRepository.findByAddress(address).stream())
+                .map(person -> {
+                    PersonDTO personDTO = new PersonDTO();
+                    personDTO.setFirstName(person.getFirstName());
+                    personDTO.setLastName(person.getLastName());
+                    personDTO.setPhone(person.getPhone());
+                    personDTO.setAddress(person.getAddress());
+                    return personDTO;
+                })
+                .toList();
+
+        List<LocalDate> birthDates = addresses.stream()
+                .flatMap(address -> personRepository.findByAddress(address).stream())
+                .flatMap(person -> medicalRecordRepository
+                        .findBirthdateByFirstNameAndLastName(person.getFirstName(), person.getLastName()).stream())
+                .toList();
+
+        LocalDate now = LocalDate.now();
+
+        long minorCount = birthDates.stream()
+                .filter(birthDate -> Period.between(birthDate, now).getYears() < 18)
+                .count();
+
+        long majorCount = birthDates.size() - minorCount;
+
+        PersonWithCountDTO personWithCountDTO = new PersonWithCountDTO();
+        personWithCountDTO.setPersonDTOs(personDTOs);
+        personWithCountDTO.setMinorCount((int) minorCount);
+        personWithCountDTO.setMajorCount((int) majorCount);
+
+        return personWithCountDTO;
+    }
+
+    public List <LocalDate> findBirthDates (String firstName, String lastName) {
+        return medicalRecordRepository.findBirthdateByFirstNameAndLastName(firstName, lastName);
+    }
+
+    private boolean isSamePerson(MedicalRecord medicalRecord, Person person) {
+        return medicalRecord.getFirstName().equals(person.getFirstName()) && medicalRecord.getLastName().equals(person.getLastName());
+    }
+
+    private List<Person> findMatchingPersons(MedicalRecord medicalRecord, String address) {
+        return personRepository.findAll().stream()
+                .filter(person -> isSamePerson(medicalRecord, person) && person.getAddress().equals(address))
+                .collect(Collectors.toList());
+    }
+
+    private MedicalRecord findMatchingMedicalRecord(Person person, List<MedicalRecord> medicalRecords) {
+        return medicalRecords.stream()
+                .filter(medicalRecord -> isSamePerson(medicalRecord, person))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private int calculateAge(LocalDate birthdate) {
+        LocalDate now = LocalDate.now();
+        return (int) ChronoUnit.YEARS.between(birthdate, now);
+    }
+
 }

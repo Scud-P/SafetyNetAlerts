@@ -1,11 +1,11 @@
 package com.oc.safetynet.alertsapi.controller;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.oc.safetynet.alertsapi.model.Person;
-import com.oc.safetynet.alertsapi.model.dto.PersonsWithMinorCount;
+import com.oc.safetynet.alertsapi.model.dto.ChildDTO;
+import com.oc.safetynet.alertsapi.model.dto.PersonDTO;
+import com.oc.safetynet.alertsapi.model.dto.PersonWithCountDTO;
 import com.oc.safetynet.alertsapi.service.FireStationService;
 import com.oc.safetynet.alertsapi.service.PersonService;
-import com.oc.safetynet.alertsapi.view.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +26,13 @@ public class PersonController {
     }
 
     @GetMapping(value = "/firestation", params = "stationNumber")
-    public PersonsWithMinorCount getPersonsByStation(@RequestParam(name = "stationNumber") int station) {
-        return personService.getPersonsByStationWithMinorsAndCount(station);
+    public PersonWithCountDTO getPersonsByStation(@RequestParam(name = "stationNumber") int station) {
+        return personService.findPersonsByStation(station);
     }
 
     @GetMapping(value = "/childAlert", params = "address")
-    public List<Person> getAllMinorsAtAddress(@RequestParam(name = "address") String address) {
-        return personService.getMinorsByAddress(address);
+    public List<ChildDTO> getAllMinorsAtAddress(@RequestParam(name = "address") String address) {
+        return personService.findMinorsAtAddress(address);
     }
 
 
