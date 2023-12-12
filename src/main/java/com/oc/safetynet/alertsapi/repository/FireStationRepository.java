@@ -14,4 +14,7 @@ public interface FireStationRepository extends JpaRepository<FireStation, Long> 
     List<FireStation> findByStation(int station);
     @Query("SELECT f.address FROM FireStation f WHERE f.station = :station")
     List<String> findAddressesByStation(@Param("station") int station);
+
+    @Query("SELECT f.station FROM FireStation f WHERE f.address = :address")
+    int findStationNumberByAddress(String address);
 }

@@ -3,9 +3,7 @@ package com.oc.safetynet.alertsapi.service;
 import com.oc.safetynet.alertsapi.model.FireStation;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
-import com.oc.safetynet.alertsapi.model.dto.ChildDTO;
-import com.oc.safetynet.alertsapi.model.dto.PersonDTO;
-import com.oc.safetynet.alertsapi.model.dto.PersonWithCountDTO;
+import com.oc.safetynet.alertsapi.model.dto.*;
 import com.oc.safetynet.alertsapi.repository.FireStationRepository;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import com.oc.safetynet.alertsapi.repository.PersonRepository;
@@ -70,6 +68,48 @@ public class PersonService {
                 .flatMap(List::stream)
                 .distinct()
                 .toList();
+    }
+
+    public PersonFireWithStationNumberDTO findPersonsAtAddress(String address) {
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll(); // Try to target better
+        List<Person> persons = medicalRecords.stream()
+                .flatMap(medicalRecord -> findMatchingPersons(medicalRecord, address).stream())
+                .distinct()
+                .toList();
+
+        logger.info("Persons: {}", persons);
+
+        List<PersonFireDTO> personsFireDTO = persons.stream()
+                .map(person -> {
+                    PersonFireDTO personFireDTO = new PersonFireDTO();
+                    personFireDTO.setFirstName(person.getFirstName());
+                    personFireDTO.setLastName(person.getLastName());
+                    personFireDTO.setPhone(person.getPhone());
+
+                    MedicalRecord matchingMedicalRecord = findMatchingMedicalRecord(person, medicalRecords);
+                    logger.info("Matching medical record: {}", matchingMedicalRecord);
+
+
+                    int age = calculateAge(matchingMedicalRecord.getBirthdate());
+                    personFireDTO.setAge(age);
+
+                    List<String> allergies = matchingMedicalRecord.getAllergies();
+                    List<String> medications = matchingMedicalRecord.getMedications();
+                    personFireDTO.setAllergies(allergies);
+                    personFireDTO.setMedications(medications);
+
+                    return personFireDTO;
+
+                })
+                .toList();
+
+        PersonFireWithStationNumberDTO personFireWithStationNumberDTO = new PersonFireWithStationNumberDTO();
+        personFireWithStationNumberDTO.setPersonFireDTOs(personsFireDTO);
+
+        int station = fireStationRepository.findStationNumberByAddress(address);
+        personFireWithStationNumberDTO.setStation(station);
+
+        return personFireWithStationNumberDTO;
     }
 
     public List<ChildDTO> findMinorsAtAddress(String address) {

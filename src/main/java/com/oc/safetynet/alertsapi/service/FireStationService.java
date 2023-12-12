@@ -22,4 +22,9 @@ public class FireStationService {
     public List<FireStation> saveAllFireStations(List<FireStation> firestations) {
         return fireStationRepository.saveAll(firestations);
     }
+
+    public int getFireStationByAddress(String address) {
+        return fireStationRepository.findStationNumberByAddress(address);
+    }
+
 }

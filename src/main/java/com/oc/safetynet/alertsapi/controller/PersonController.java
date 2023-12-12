@@ -1,9 +1,7 @@
 package com.oc.safetynet.alertsapi.controller;
 
 import com.oc.safetynet.alertsapi.model.Person;
-import com.oc.safetynet.alertsapi.model.dto.ChildDTO;
-import com.oc.safetynet.alertsapi.model.dto.PersonDTO;
-import com.oc.safetynet.alertsapi.model.dto.PersonWithCountDTO;
+import com.oc.safetynet.alertsapi.model.dto.*;
 import com.oc.safetynet.alertsapi.service.FireStationService;
 import com.oc.safetynet.alertsapi.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +33,10 @@ public class PersonController {
         return personService.findMinorsAtAddress(address);
     }
 
+    @GetMapping(value = "/fire", params = "address")
+    public PersonFireWithStationNumberDTO getAllPersonsAtAddress(@RequestParam(name = "address") String address) {
+        return personService.findPersonsAtAddress(address);
+    }
 
     @PostMapping
     public Person addPerson(@RequestBody Person person) {
