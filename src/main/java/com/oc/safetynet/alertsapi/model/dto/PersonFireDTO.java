@@ -4,6 +4,18 @@ import java.util.List;
 
 public class PersonFireDTO {
 
+    public PersonFireDTO(String firstName, String lastName, String phone, int age, List<String> medications, List<String> allergies) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.age = age;
+        this.medications = medications;
+        this.allergies = allergies;
+    }
+
+    public PersonFireDTO() {
+    }
+
     public String getFirstName() {
         return firstName;
     }

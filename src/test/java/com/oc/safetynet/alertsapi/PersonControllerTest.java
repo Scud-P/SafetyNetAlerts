@@ -1,5 +1,7 @@
 package com.oc.safetynet.alertsapi;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -8,8 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.oc.safetynet.alertsapi.controller.FireStationController;
 import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
 import com.oc.safetynet.alertsapi.controller.PersonController;
-import com.oc.safetynet.alertsapi.model.dto.FamilyMemberDTO;
-import com.oc.safetynet.alertsapi.model.dto.HomeDTO;
+import com.oc.safetynet.alertsapi.model.Person;
+import com.oc.safetynet.alertsapi.model.dto.*;
+import com.oc.safetynet.alertsapi.repository.PersonRepository;
 import com.oc.safetynet.alertsapi.service.PersonService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,9 @@ public class PersonControllerTest {
 
     @MockBean
     private FireStationController fireStationController;
+
+    @MockBean
+    private PersonRepository personRepository;
 
     @Test
     public void testGetPersons() throws Exception {
@@ -103,4 +109,132 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("$[1].familyMembers[1].firstName").value("Léon"));
     }
 
+    @Test
+    public void testGetPersonsByStation() throws Exception {
+
+        int stationNumber = 1;
+
+        List<PersonDTO> personDTOs = List.of(
+                new PersonDTO("Bob", "Ross", "Address1", "123-456-789"),
+                new PersonDTO("Bobette", "Ross", "Address1", "987-654-321"),
+                new PersonDTO("Jacques", "Chirac", "Address2", "222-222-222")
+        );
+
+        int minorCount = 1;
+        int majorCount = 2;
+
+        PersonWithCountDTO personWithCountDTO = new PersonWithCountDTO(personDTOs, minorCount, majorCount);
+
+        when(personService.findPersonsByStation(stationNumber)).thenReturn(personWithCountDTO);
+
+        mockMvc.perform(get("/firestation").param("stationNumber", String.valueOf(stationNumber)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.personDTOs",hasSize(3)))
+                .andExpect(jsonPath("$.minorCount").value(minorCount))
+                .andExpect(jsonPath("$.majorCount").value(majorCount))
+                .andExpect(jsonPath("$.personDTOs[0].firstName").value("Bob"))
+                .andExpect(jsonPath("$.personDTOs[1].lastName").value("Ross"))
+                .andExpect(jsonPath("$.personDTOs[2].address").value("Address2"))
+                .andExpect(jsonPath("$.personDTOs[0].phone").value("123-456-789"));
+    }
+
+    @Test
+    public void testGetAllMinorsAtAddress() throws Exception {
+
+        String address = "test address";
+
+        List<Person> familyMembers1 = List.of(
+                new Person(1L,"Edouard", "Balladur", "test address", "test city", "test zip", "test phone", "test email"),
+                new Person(2L,"Donald", "Trump", "test address", "test city", "test zip", "test phone", "test email" )
+        );
+
+        List<Person> familyMembers2 = List.of(
+                new Person(1L,"Edouard", "Balladur", "test address", "test city", "test zip", "test phone", "test email"),
+                new Person(2L,"Donald", "Trump", "test address", "test city", "test zip", "test phone", "test email" )
+        );
+
+
+        List<ChildDTO> minors = List.of(
+                new ChildDTO("Nicolas", "Sarkozy", 15, familyMembers1),
+                new ChildDTO("Xi", "Xingping", 12, familyMembers2)
+        );
+
+        when(personService.findMinorsAtAddress(address)).thenReturn(minors);
+
+        mockMvc.perform(get("/childAlert").param("address", address))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$[0].firstName").value("Nicolas"))
+                .andExpect(jsonPath("$[1].lastName").value("Xingping"))
+                .andExpect(jsonPath("$[0].age").value("15"))
+                .andExpect(jsonPath("$[0].familyMembers[0].firstName").value("Edouard"))
+                .andExpect(jsonPath("$[1].familyMembers[1].lastName").value("Trump"));
+    }
+
+    @Test
+    public void testGetAllPersonsAtAddress() throws Exception {
+
+        String address = "test address";
+        int stationNumber = 1;
+
+        List<String> allergiesBob = new ArrayList<>();
+        allergiesBob.add("Capitalism");
+        allergiesBob.add("Pop Music");
+        List<String> medicationsBob = new ArrayList<>();
+        medicationsBob.add("Reggae");
+        medicationsBob.add("Women");
+
+        List<String> allergiesJim = new ArrayList<>();
+        allergiesJim.add("Christianity");
+        allergiesJim.add("Ukulele");
+        List<String> medicationJim = new ArrayList<>();
+        medicationJim.add("Black Magic");
+        medicationJim.add("Guitar Solos");
+
+        List<PersonFireDTO> personFireDTOs= List.of(
+                new PersonFireDTO("Bob", "White", "test phone", 50, allergiesBob, medicationsBob),
+                new PersonFireDTO("Jim", "Black", " test phone", 25, allergiesJim, medicationJim)
+        );
+
+        PersonFireWithStationNumberDTO personFireWithStationNumberDTO = new PersonFireWithStationNumberDTO(stationNumber, personFireDTOs);
+
+        when(personService.findPersonsAtAddress(address)).thenReturn(personFireWithStationNumberDTO);
+
+        mockMvc.perform(get("/fire").param("address", address))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.personFireDTOs",hasSize(2)))
+                .andExpect(jsonPath("$.personFireDTOs[0].firstName").value("Bob"))
+                .andExpect(jsonPath("$.personFireDTOs[1].lastName").value("Black"))
+                .andExpect(jsonPath("$.personFireDTOs[0].phone").value("test phone"))
+                .andExpect(jsonPath("$.personFireDTOs[1].age").value(25))
+                .andExpect(jsonPath("$.personFireDTOs[0].allergies",hasSize(2)))
+                .andExpect(jsonPath("$.personFireDTOs[1].medications",hasSize(2)));
+    }
+
+    @Test
+    public void testGetPhonesByStation() throws Exception {
+
+        int stationNumber = 1;
+
+        List<String> addresses = List.of(
+                "test address 1",
+                "test address 2",
+                "test address 3"
+        );
+
+        when(personService.findPhonesByStation(stationNumber)).thenReturn(addresses);
+
+
+        mockMvc.perform(get("/phoneAlert").param("firestation", String.valueOf(stationNumber)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0]").value("test address 1"))
+                .andExpect(jsonPath("$[1]").value("test address 2"))
+                .andExpect(jsonPath("$[2]").value("test address 3"));
+
+    }
 }

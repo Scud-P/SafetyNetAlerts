@@ -9,7 +9,17 @@ public class ChildDTO {
     private String firstName;
     private String lastName;
     private int age;
-    List<Person> familyMembers;
+    private List<Person> familyMembers;
+
+    public ChildDTO(String firstName, String lastName, int age, List<Person> familyMembers) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = age;
+        this.familyMembers = familyMembers;
+    }
+
+    public ChildDTO() {
+    }
 
     public String getFirstName() {
         return firstName;

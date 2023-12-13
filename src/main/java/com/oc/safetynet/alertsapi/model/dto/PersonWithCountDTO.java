@@ -10,6 +10,15 @@ public class PersonWithCountDTO {
 
     private int majorCount;
 
+    public PersonWithCountDTO(List<PersonDTO> personDTOs, int minorCount, int majorCount) {
+        this.personDTOs = personDTOs;
+        this.minorCount = minorCount;
+        this.majorCount = majorCount;
+    }
+
+    public PersonWithCountDTO() {
+    }
+
 
     public List<PersonDTO> getPersonDTOs() {
         return personDTOs;

@@ -4,6 +4,14 @@ import java.util.List;
 
 public class PersonFireWithStationNumberDTO {
 
+    public PersonFireWithStationNumberDTO(int station, List<PersonFireDTO> personFireDTOs) {
+        this.station = station;
+        this.personFireDTOs = personFireDTOs;
+    }
+
+    public PersonFireWithStationNumberDTO() {
+    }
+
     public List<PersonFireDTO> getPersonFireDTOs() {
         return personFireDTOs;
     }
