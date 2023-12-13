@@ -1,7 +1,5 @@
 package com.oc.safetynet.alertsapi.model;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.oc.safetynet.alertsapi.view.Views;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

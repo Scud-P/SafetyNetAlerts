@@ -1,6 +1,7 @@
 package com.oc.safetynet.alertsapi.service;
 
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
+import com.oc.safetynet.alertsapi.model.dto.MedicalRecordDTO;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,5 +31,10 @@ public class MedicalRecordService {
     public List<MedicalRecord> findMedicalRecordBornAfter(LocalDate date) {
         return medicalRecordRepository.findByBirthdateAfter(date);
     }
+
+    public List<MedicalRecordDTO> findMedicalRecord() {
+        return null;
+    }
+
 
 }

@@ -27,4 +27,8 @@ public class FireStationService {
         return fireStationRepository.findStationNumberByAddress(address);
     }
 
+    public List<String> getAddressesByStation(int station) {
+        return fireStationRepository.findAddressesByStation(station);
+    }
+
 }

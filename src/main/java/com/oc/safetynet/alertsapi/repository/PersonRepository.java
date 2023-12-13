@@ -17,4 +17,12 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     @Query("SELECT p.phone FROM Person p WHERE p.address = :address")
     List<String> findPhoneByAddress(@Param("address") String address);
 
+    @Query("SELECT p.email FROM Person p WHERE LOWER(p.city) = LOWER(:city)")
+    List<String> findEmailsByCity(@Param("city") String city);
+
+    @Query("SELECT p FROM Person p WHERE LOWER(p.firstName) = LOWER(:firstName) AND LOWER(p.lastName) = LOWER(:lastName)")
+    List<Person> findPersonByFirstNameAndLastName(
+            @Param("firstName") String firstName,
+            @Param("lastName") String lastName
+        );
 }

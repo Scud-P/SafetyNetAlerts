@@ -15,12 +15,15 @@ public class PersonController {
     @Autowired
     private PersonService personService;
 
-    @Autowired
-    private FireStationService fireStationService;
-
     @GetMapping("/persons")
     public List<Person> getAllPersons() {
         return personService.getAllPersons();
+    }
+
+
+    @GetMapping(value = "/flood/stations", params = "stationNumber")
+    public List<HomeDTO> getAddressesByStation(@RequestParam(name = "stationNumber") int station) {
+        return personService.findHomesByStation(station);
     }
 
     @GetMapping(value = "/firestation", params = "stationNumber")
@@ -52,4 +55,13 @@ public class PersonController {
         return personService.findPhonesByStation(station);
     }
 
+    @GetMapping(value = "/communityEmail", params = "city")
+    public List<String> getEmailsByCity(@RequestParam(name = "city") String city) {
+        return personService.findEmailsByCity(city);
+    }
+
+    @GetMapping(value = "/personInfo", params = {"firstName", "lastName"})
+    public List<PersonInfoDTO> getPersonByFirstNameAndLastName(@RequestParam(name = "firstName") String firstName, @RequestParam(name = "lastName") String lastName) {
+        return personService.findPersonInfoListDTO(firstName, lastName);
+    }
 }

@@ -11,9 +11,7 @@ import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
@@ -69,6 +67,66 @@ public class PersonService {
                 .distinct()
                 .toList();
     }
+
+    public List<PersonInfoDTO> findPersonInfoListDTO(String firstName, String lastName) {
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll(); // Try to target better - Create method findMedicalRecordByFirstNameAndLastName?
+        List<Person> persons = personRepository.findPersonByFirstNameAndLastName(firstName, lastName);
+        List<PersonInfoDTO> personsWithInfo = persons.stream()
+                .map(person -> {
+                    PersonInfoDTO personInfoDTO = new PersonInfoDTO();
+                    personInfoDTO.setFirstName(person.getFirstName());
+                    personInfoDTO.setLastName(person.getLastName());
+                    personInfoDTO.setAddress(person.getAddress());
+                    personInfoDTO.setEmail(person.getEmail());
+
+                    MedicalRecord medicalRecord = findMatchingMedicalRecord(person, medicalRecords);
+                    int age = calculateAge(medicalRecord.getBirthdate());
+                    personInfoDTO.setAge(age);
+                    personInfoDTO.setAllergies(medicalRecord.getAllergies());
+                    personInfoDTO.setMedications(medicalRecord.getMedications());
+
+                    return personInfoDTO;
+
+                })
+                .toList();
+        return personsWithInfo;
+    }
+
+
+    public List<HomeDTO> findHomesByStation(int station) {
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll(); // Try to target better
+        List<String> addresses = fireStationRepository.findAddressesByStation(station);
+        List<HomeDTO> homeDTOS = addresses.stream()
+                .map(address -> {
+                    List<Person> persons = personRepository.findByAddress(address);
+
+                    List<FamilyMemberDTO> familyMembers = persons.stream()
+                            .map(person-> {
+                                FamilyMemberDTO familyMember = new FamilyMemberDTO();
+                                familyMember.setFirstName(person.getFirstName());
+                                familyMember.setLastName(person.getLastName());
+                                familyMember.setPhone(person.getPhone());
+
+                                MedicalRecord medicalRecord = findMatchingMedicalRecord(person, medicalRecords);
+                                int age = calculateAge(medicalRecord.getBirthdate());
+
+                                familyMember.setAge(age);
+                                familyMember.setAllergies(medicalRecord.getAllergies());
+                                familyMember.setMedications(medicalRecord.getMedications());
+                                return familyMember;
+                            })
+                            .toList();
+
+                    HomeDTO homeDTO = new HomeDTO();
+                    homeDTO.setAddress(address);
+                    homeDTO.setFamilyMembers(familyMembers);
+                    return homeDTO;
+                })
+                .toList();
+
+        return homeDTOS;
+    }
+
 
     public PersonFireWithStationNumberDTO findPersonsAtAddress(String address) {
         List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll(); // Try to target better
@@ -142,6 +200,7 @@ public class PersonService {
         return minorsAtAddressDTO;
     }
 
+
     public PersonWithCountDTO findPersonsByStation(int station) {
         List<String> addresses = fireStationRepository.findAddressesByStation(station);
 
@@ -205,4 +264,11 @@ public class PersonService {
         return (int) ChronoUnit.YEARS.between(birthdate, now);
     }
 
+    public List<String> findEmailsByCity(String city) {
+        List<String> emails = personRepository.findEmailsByCity(city).stream()
+                        .distinct()
+                .toList();
+        logger.info("Emails for City {}: {}", city, emails);
+        return emails;
+    }
 }
