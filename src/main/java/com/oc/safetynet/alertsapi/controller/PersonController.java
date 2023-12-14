@@ -41,7 +41,7 @@ public class PersonController {
         return personService.findPersonsAtAddress(address);
     }
 
-    @PostMapping
+    @PostMapping("/person")
     public Person addPerson(@RequestBody Person person) {
         return personService.savePerson(person);
     }

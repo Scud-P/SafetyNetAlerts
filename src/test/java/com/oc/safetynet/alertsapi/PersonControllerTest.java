@@ -1,11 +1,12 @@
 package com.oc.safetynet.alertsapi;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.oc.safetynet.alertsapi.controller.FireStationController;
 import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
@@ -18,10 +19,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @WebMvcTest(controllers = PersonController.class)
@@ -41,6 +44,9 @@ public class PersonControllerTest {
 
     @MockBean
     private PersonRepository personRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     public void testGetPersons() throws Exception {
@@ -227,7 +233,6 @@ public class PersonControllerTest {
 
         when(personService.findPhonesByStation(stationNumber)).thenReturn(addresses);
 
-
         mockMvc.perform(get("/phoneAlert").param("firestation", String.valueOf(stationNumber)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
@@ -235,6 +240,97 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("$[0]").value("test address 1"))
                 .andExpect(jsonPath("$[1]").value("test address 2"))
                 .andExpect(jsonPath("$[2]").value("test address 3"));
+    }
 
+    @Test
+    public void testGetEmailsByCity() throws Exception {
+
+        String city = "Gotham";
+
+        List <String> emails = List.of(
+                "bob@bob.bob",
+                "bib@bib.bib",
+                "bab@bab.bab"
+        );
+
+        when(personService.findEmailsByCity(city)).thenReturn(emails);
+
+        mockMvc.perform(get("/communityEmail").param("city", city))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0]").value("bob@bob.bob"))
+                .andExpect(jsonPath("$[1]").value("bib@bib.bib"))
+                .andExpect(jsonPath("$[2]").value("bab@bab.bab"));
+    }
+
+    @Test
+    public void testAddPerson() throws Exception {
+
+        Person personToAdd = new Person(1L, "Bob", "Dylan", "test address", "test city", "test zip", "test phone", "test email");
+        when(personService.savePerson(any(Person.class))).thenReturn(personToAdd);
+
+        mockMvc.perform(post("/person")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(personToAdd)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Bob"))
+                .andExpect(jsonPath("$.lastName").value("Dylan"))
+                .andExpect(jsonPath("$.address").value("test address"))
+                .andExpect(jsonPath("$.city").value("test city"))
+                .andExpect(jsonPath("$.zip").value("test zip"))
+                .andExpect(jsonPath("$.phone").value("test phone"))
+                .andExpect(jsonPath("$.email").value("test email"));
+
+    }
+
+    @Test
+    public void testGetPersonByFirstNameAndLastName() throws Exception {
+
+        String firstName = "Bob";
+        String lastName = "Dylan";
+
+        List<String> allergiesBob = new ArrayList<>();
+        allergiesBob.add("Capitalism");
+        allergiesBob.add("Pop Music");
+        List<String> medicationsBob = new ArrayList<>();
+        medicationsBob.add("Reggae");
+        medicationsBob.add("Women");
+
+        List<String> allergiesBob2 = new ArrayList<>();
+        allergiesBob2.add("Shellfish");
+        allergiesBob2.add("Gluten");
+        List<String> medicationsBob2 = new ArrayList<>();
+        medicationsBob2.add("Prozac 30mg");
+        medicationsBob2.add("Viagra 10mg");
+
+        List<String> allergiesBob3 = new ArrayList<>();
+        allergiesBob3.add("Penicillin");
+        allergiesBob3.add("Lactose");
+        List<String> medicationsBob3 = new ArrayList<>();
+        medicationsBob3.add("Aspirin");
+        medicationsBob3.add("Chocolate");
+
+        List<PersonInfoDTO> persons = List.of(
+                new PersonInfoDTO("Bob", "Dylan", "test address 1", "bob1@bob.bob", 20, allergiesBob, medicationsBob),
+                new PersonInfoDTO("Bob", "Dylan", "test address 2", "bob2@bob.bob", 21, allergiesBob2, medicationsBob2),
+                new PersonInfoDTO("Bob", "Dylan", "test address 3", "bob3@bob.bob", 22, allergiesBob3, medicationsBob3)
+        );
+
+        when(personService.findPersonInfoListDTO(firstName, lastName)).thenReturn(persons);
+
+        mockMvc.perform(get("/personInfo")
+                        .param("firstName", firstName)
+                        .param("lastName", lastName))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].firstName").value("Bob"))
+                .andExpect(jsonPath("$[1].lastName").value("Dylan"))
+                .andExpect(jsonPath("$[2].address").value("test address 3"))
+                .andExpect(jsonPath("$[0].email").value("bob1@bob.bob"))
+                .andExpect(jsonPath("$[1].age").value(21))
+                .andExpect(jsonPath("$[2].allergies[0]").value("Penicillin"))
+                .andExpect(jsonPath("$[0].medications[1]").value("Women"));
     }
 }
