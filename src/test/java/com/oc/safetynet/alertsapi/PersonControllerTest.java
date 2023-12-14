@@ -281,7 +281,6 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("$.zip").value("test zip"))
                 .andExpect(jsonPath("$.phone").value("test phone"))
                 .andExpect(jsonPath("$.email").value("test email"));
-
     }
 
     @Test

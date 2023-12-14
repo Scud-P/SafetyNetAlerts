@@ -46,7 +46,7 @@ public class PersonController {
         return personService.savePerson(person);
     }
 
-    @PostMapping("/batch")
+    @PostMapping("/batchperson")
     public List<Person> addAllPersons(@RequestBody List<Person> persons) {
         return personService.saveAllPersons(persons);
     }

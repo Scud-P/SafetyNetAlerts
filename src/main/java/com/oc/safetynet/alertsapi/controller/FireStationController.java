@@ -10,21 +10,20 @@ import com.fasterxml.jackson.annotation.JsonView;
 import java.util.List;
 
 @RestController
-@RequestMapping("/stations")
 public class FireStationController {
 
     @Autowired
     FireStationService fireStationService;
 
-    @GetMapping
+    @GetMapping("/firestations")
     public List<FireStation> getAllFireStations() {
         return fireStationService.getAllFireStations();
     }
 
-    @PostMapping
-    public FireStation addFireStation(@RequestBody FireStation fireStation) {
-        return fireStationService.saveFireStation(fireStation);
-    }
+//    @PostMapping
+//    public FireStation addFireStation(@RequestBody FireStation fireStation) {
+//        return fireStationService.saveFireStation(fireStation);
+//    }
 
     @PostMapping("/batch")
     public List<FireStation> addAllFireStations(@RequestBody List<FireStation> fireStations) {
