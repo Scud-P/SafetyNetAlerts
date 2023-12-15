@@ -14,8 +14,16 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     List<Person> findByAddress(String address);
 
-    @Query("SELECT p.phone FROM Person p WHERE p.address = :address")
+    Person findByFirstNameAndLastName(String firstName, String lastName);
+
+    void deleteByFirstNameAndLastName(String firstName, String lastName);
+
+
+    @Query("SELECT DISTINCT p.phone FROM Person p WHERE p.address = :address")
     List<String> findPhoneByAddress(@Param("address") String address);
+
+    @Query("SELECT DISTINCT p.phone FROM Person p WHERE p.address in :addresses")
+    List<String> findPhoneByAddresses(@Param("addresses") List<String> addresses);
 
     @Query("SELECT p.email FROM Person p WHERE LOWER(p.city) = LOWER(:city)")
     List<String> findEmailsByCity(@Param("city") String city);
@@ -25,4 +33,5 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             @Param("firstName") String firstName,
             @Param("lastName") String lastName
         );
+
 }

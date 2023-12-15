@@ -16,4 +16,7 @@ public interface MedicalRecordRepository extends JpaRepository <MedicalRecord, L
 
     List<MedicalRecord> findByBirthdateAfter(LocalDate date);
 
+    void deleteByFirstNameAndLastName(String firstName, String lastName);
+
+    MedicalRecord findByFirstNameAndLastName(String firstName, String lastName);
 }

@@ -19,10 +19,20 @@ public class MedicalRecordController {
         return medicalRecordService.getAllMedicalRecords();
     }
 
-//    @PostMapping("/medicalrecord")
-//    public MedicalRecord addMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
-//        return medicalRecordService.saveMedicalRecord(medicalRecord);
-//    }
+    @PostMapping("/medicalRecord")
+    public MedicalRecord addMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
+        return medicalRecordService.addMedicalRecord(medicalRecord);
+    }
+
+    @DeleteMapping("/medicalRecord")
+    public void deleteMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
+       medicalRecordService.deleteMedicalRecord(medicalRecord);
+    }
+
+    @PutMapping("/medicalRecord")
+    public MedicalRecord updateMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
+        return medicalRecordService.updateMedicalRecord(medicalRecord);
+    }
 
     @PostMapping("/batchmedicalrecord")
     public List<MedicalRecord> addAllMedicalRecords(@RequestBody List<MedicalRecord> medicalRecords) {

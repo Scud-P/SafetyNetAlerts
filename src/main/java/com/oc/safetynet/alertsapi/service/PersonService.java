@@ -7,11 +7,14 @@ import com.oc.safetynet.alertsapi.model.dto.*;
 import com.oc.safetynet.alertsapi.repository.FireStationRepository;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import com.oc.safetynet.alertsapi.repository.PersonRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
@@ -61,11 +64,7 @@ public class PersonService {
 
     public List<String> findPhonesByStation(int station) {
         List<String> addresses = fireStationRepository.findAddressesByStation(station);
-        return addresses.stream()
-                .map(address -> personRepository.findPhoneByAddress(address))
-                .flatMap(List::stream)
-                .distinct()
-                .toList();
+        return personRepository.findPhoneByAddresses(addresses);
     }
 
     public List<PersonInfoDTO> findPersonInfoListDTO(String firstName, String lastName) {
@@ -270,5 +269,49 @@ public class PersonService {
                 .toList();
         logger.info("Emails for City {}: {}", city, emails);
         return emails;
+    }
+
+    public Person addPerson (Person person){
+        if(person.getId()!= 0) {
+            throw new IllegalArgumentException("ID is automatically incremented");
+        }
+        person.setFirstName(person.getFirstName());
+        person.setLastName(person.getLastName());
+        person.setAddress(person.getAddress());
+        person.setCity(person.getCity());
+        person.setZip(person.getZip());
+        person.setPhone(person.getPhone());
+        person.setEmail(person.getEmail());
+
+        logger.info("Person added: {}", person);
+
+        return personRepository.save(person);
+    }
+
+    @Transactional
+    public void deletePerson(Person person) {
+        String firstName = person.getFirstName();
+        String lastName = person.getLastName();
+
+        logger.info("Person deleted: {} {}", firstName, lastName);
+
+        personRepository.deleteByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+    }
+
+    public Person updatePerson (Person person) {
+
+        Person personToUpdate = personRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+
+        logger.info("Person before update: {}", personToUpdate);
+
+        person.setAddress(person.getAddress());
+        person.setCity(person.getCity());
+        person.setZip(person.getZip());
+        person.setPhone(person.getPhone());
+        person.setEmail(person.getEmail());
+
+        logger.info("Person after updating: {}", person);
+
+        return personRepository.save(person);
     }
 }

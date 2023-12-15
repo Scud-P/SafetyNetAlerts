@@ -4,6 +4,7 @@ import com.oc.safetynet.alertsapi.model.Person;
 import com.oc.safetynet.alertsapi.model.dto.*;
 import com.oc.safetynet.alertsapi.service.FireStationService;
 import com.oc.safetynet.alertsapi.service.PersonService;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,21 @@ public class PersonController {
     @GetMapping("/persons")
     public List<Person> getAllPersons() {
         return personService.getAllPersons();
+    }
+
+    @PostMapping("/person")
+    public Person addPerson(@RequestBody Person person) {
+        return personService.addPerson(person);
+    }
+
+    @DeleteMapping("/person")
+    public void deletePerson(@RequestBody Person person) {
+        personService.deletePerson(person);
+    }
+
+    @PutMapping("/person")
+    public Person updatePerson (@RequestBody Person person) {
+        return personService.updatePerson(person);
     }
 
 
@@ -39,11 +55,6 @@ public class PersonController {
     @GetMapping(value = "/fire", params = "address")
     public PersonFireWithStationNumberDTO getAllPersonsAtAddress(@RequestParam(name = "address") String address) {
         return personService.findPersonsAtAddress(address);
-    }
-
-    @PostMapping("/person")
-    public Person addPerson(@RequestBody Person person) {
-        return personService.savePerson(person);
     }
 
     @PostMapping("/batchperson")
