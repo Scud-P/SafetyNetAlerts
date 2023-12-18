@@ -7,7 +7,6 @@ import com.oc.safetynet.alertsapi.model.dto.*;
 import com.oc.safetynet.alertsapi.repository.FireStationRepository;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import com.oc.safetynet.alertsapi.repository.PersonRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +34,8 @@ public class PersonService {
 
     @Autowired
     private MedicalRecordRepository medicalRecordRepository;
+
+    @Autowired MedicalRecordService medicalRecordService;
 
     public List<Person> getAllPersons() {
         return personRepository.findAll();
@@ -68,171 +68,150 @@ public class PersonService {
     }
 
     public List<PersonInfoDTO> findPersonInfoListDTO(String firstName, String lastName) {
-        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll(); // Try to target better - Create method findMedicalRecordByFirstNameAndLastName?
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAllByFirstNameAndLastName(firstName, lastName);
+        logger.info("Medical Record(s) found: {}", medicalRecords);
         List<Person> persons = personRepository.findPersonByFirstNameAndLastName(firstName, lastName);
-        List<PersonInfoDTO> personsWithInfo = persons.stream()
-                .map(person -> {
-                    PersonInfoDTO personInfoDTO = new PersonInfoDTO();
-                    personInfoDTO.setFirstName(person.getFirstName());
-                    personInfoDTO.setLastName(person.getLastName());
-                    personInfoDTO.setAddress(person.getAddress());
-                    personInfoDTO.setEmail(person.getEmail());
+        logger.info("Person(s) found: {}", persons);
 
-                    MedicalRecord medicalRecord = findMatchingMedicalRecord(person, medicalRecords);
-                    int age = calculateAge(medicalRecord.getBirthdate());
-                    personInfoDTO.setAge(age);
-                    personInfoDTO.setAllergies(medicalRecord.getAllergies());
-                    personInfoDTO.setMedications(medicalRecord.getMedications());
+        List<PersonInfoDTO> personInfoDTOS = new ArrayList<>();
 
-                    return personInfoDTO;
+        for(int i = 0; i < medicalRecords.size() && i < persons.size(); i++) {
+            MedicalRecord medicalRecord = medicalRecords.get(i);
+            Person person = persons.get(i);
 
-                })
-                .toList();
-        return personsWithInfo;
+            PersonInfoDTO personInfoDTO = new PersonInfoDTO();
+
+            personInfoDTO.setFirstName(person.getFirstName());
+            personInfoDTO.setLastName(person.getLastName());
+            personInfoDTO.setAddress(person.getAddress());
+            personInfoDTO.setEmail(person.getEmail());
+
+            int age = calculateAge(medicalRecord.getBirthdate());
+            personInfoDTO.setAge(age);
+            personInfoDTO.setMedications(medicalRecord.getMedications());
+            personInfoDTO.setAllergies(medicalRecord.getAllergies());
+
+            personInfoDTOS.add(personInfoDTO);
+        }
+        return personInfoDTOS;
     }
 
 
+
     public List<HomeDTO> findHomesByStation(int station) {
-        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll(); // Try to target better
         List<String> addresses = fireStationRepository.findAddressesByStation(station);
-        List<HomeDTO> homeDTOS = addresses.stream()
-                .map(address -> {
-                    List<Person> persons = personRepository.findByAddress(address);
+        List<HomeDTO> homeDTOS = new ArrayList<>();
 
-                    List<FamilyMemberDTO> familyMembers = persons.stream()
-                            .map(person-> {
-                                FamilyMemberDTO familyMember = new FamilyMemberDTO();
-                                familyMember.setFirstName(person.getFirstName());
-                                familyMember.setLastName(person.getLastName());
-                                familyMember.setPhone(person.getPhone());
+        for (String address : addresses) {
+            List<Person> persons = personRepository.findByAddress(address);
+            List<FamilyMemberDTO> familyMemberDTOS = new ArrayList<>();
 
-                                MedicalRecord medicalRecord = findMatchingMedicalRecord(person, medicalRecords);
-                                int age = calculateAge(medicalRecord.getBirthdate());
+            for (Person person : persons) {
+                MedicalRecord medicalRecord = medicalRecordRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+                FamilyMemberDTO familyMemberDTO = new FamilyMemberDTO();
+                familyMemberDTO.setFirstName(person.getFirstName());
+                familyMemberDTO.setLastName(person.getLastName());
+                familyMemberDTO.setPhone(person.getPhone());
+                int age = calculateAge(medicalRecord.getBirthdate());
+                familyMemberDTO.setAge(age);
+                familyMemberDTO.setAllergies(medicalRecord.getAllergies());
+                familyMemberDTO.setMedications(medicalRecord.getMedications());
+                familyMemberDTOS.add(familyMemberDTO);
 
-                                familyMember.setAge(age);
-                                familyMember.setAllergies(medicalRecord.getAllergies());
-                                familyMember.setMedications(medicalRecord.getMedications());
-                                return familyMember;
-                            })
-                            .toList();
-
-                    HomeDTO homeDTO = new HomeDTO();
-                    homeDTO.setAddress(address);
-                    homeDTO.setFamilyMembers(familyMembers);
-                    return homeDTO;
-                })
-                .toList();
-
+                HomeDTO homeDTO = new HomeDTO();
+                homeDTO.setAddress(address);
+                homeDTO.setFamilyMembers(familyMemberDTOS);
+                homeDTOS.add(homeDTO);
+            }
+        }
         return homeDTOS;
     }
 
 
+
     public PersonFireWithStationNumberDTO findPersonsAtAddress(String address) {
-        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll(); // Try to target better
-        List<Person> persons = medicalRecords.stream()
-                .flatMap(medicalRecord -> findMatchingPersons(medicalRecord, address).stream())
-                .distinct()
-                .toList();
 
+        List<Person> persons = personRepository.findByAddress(address);
         logger.info("Persons: {}", persons);
+        List<PersonFireDTO> personFireDTOS = new ArrayList<>();
 
-        List<PersonFireDTO> personsFireDTO = persons.stream()
-                .map(person -> {
-                    PersonFireDTO personFireDTO = new PersonFireDTO();
-                    personFireDTO.setFirstName(person.getFirstName());
-                    personFireDTO.setLastName(person.getLastName());
-                    personFireDTO.setPhone(person.getPhone());
+        for(Person person : persons) {
+            MedicalRecord medicalRecord = medicalRecordRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+            PersonFireDTO personFireDTO = new PersonFireDTO();
+            personFireDTO.setFirstName(person.getFirstName());
+            personFireDTO.setLastName(person.getLastName());
+            personFireDTO.setPhone(person.getPhone());
+            personFireDTO.setAllergies(medicalRecord.getAllergies());
+            personFireDTO.setMedications(medicalRecord.getMedications());
+            int age = calculateAge(medicalRecord.getBirthdate());
+            personFireDTO.setAge(age);
+            personFireDTOS.add(personFireDTO);
 
-                    MedicalRecord matchingMedicalRecord = findMatchingMedicalRecord(person, medicalRecords);
-                    logger.info("Matching medical record: {}", matchingMedicalRecord);
-
-
-                    int age = calculateAge(matchingMedicalRecord.getBirthdate());
-                    personFireDTO.setAge(age);
-
-                    List<String> allergies = matchingMedicalRecord.getAllergies();
-                    List<String> medications = matchingMedicalRecord.getMedications();
-                    personFireDTO.setAllergies(allergies);
-                    personFireDTO.setMedications(medications);
-
-                    return personFireDTO;
-
-                })
-                .toList();
-
+        }
         PersonFireWithStationNumberDTO personFireWithStationNumberDTO = new PersonFireWithStationNumberDTO();
-        personFireWithStationNumberDTO.setPersonFireDTOs(personsFireDTO);
 
         int station = fireStationRepository.findStationNumberByAddress(address);
+        personFireWithStationNumberDTO.setPersonFireDTOs(personFireDTOS);
         personFireWithStationNumberDTO.setStation(station);
 
         return personFireWithStationNumberDTO;
-    }
+}
 
     public List<ChildDTO> findMinorsAtAddress(String address) {
         LocalDate now = LocalDate.now();
         LocalDate eighteenYearsAgo = now.minusYears(18);
 
-        List<MedicalRecord> minorsRecord = medicalRecordRepository.findByBirthdateAfter(eighteenYearsAgo);
-        List<Person> minorsAtAddress = minorsRecord.stream()
-                .flatMap(medicalRecord -> findMatchingPersons(medicalRecord, address).stream())
-                .distinct().toList();
+        List<Person> personsAtAddress = personRepository.findByAddress(address);
+        List<ChildDTO> childDTOS = new ArrayList<>();
 
-        List<Person> familyMembers = personRepository.findByAddress(address);
-        familyMembers.removeIf(minorsAtAddress::contains);
 
-        List<ChildDTO> minorsAtAddressDTO = minorsAtAddress.stream()
-                .map(person -> {
+        for (Person personAtAddress : personsAtAddress) {
+            List<MedicalRecord> medicalRecords = medicalRecordRepository.findByFirstNameAndLastNameAndBirthDateAfter(
+                    personAtAddress.getFirstName(),
+                    personAtAddress.getLastName(),
+                    eighteenYearsAgo);
+
+            for (MedicalRecord medicalRecord : medicalRecords) {
+                if (isSamePerson(medicalRecord, personAtAddress)) {
+                    int age = calculateAge(medicalRecord.getBirthdate());
                     ChildDTO childDTO = new ChildDTO();
-                    childDTO.setFirstName(person.getFirstName());
-                    childDTO.setLastName(person.getLastName());
-                    childDTO.setFamilyMembers(familyMembers);
-
-                    MedicalRecord matchingMedicalRecord = findMatchingMedicalRecord(person, minorsRecord);
-                    int age = calculateAge(matchingMedicalRecord.getBirthdate());
+                    childDTO.setFirstName(personAtAddress.getFirstName());
+                    childDTO.setLastName(personAtAddress.getLastName());
                     childDTO.setAge(age);
 
-                    return childDTO;
-                })
-                .toList();
-
-        return minorsAtAddressDTO;
+                    List<Person> familyMembers = new ArrayList<>(personsAtAddress);
+                    familyMembers.removeIf(p -> isSamePerson(medicalRecord, p));
+                    childDTO.setFamilyMembers(familyMembers);
+                    childDTOS.add(childDTO);
+                }
+            }
+        }
+        return childDTOS;
     }
 
 
     public PersonWithCountDTO findPersonsByStation(int station) {
+
         List<String> addresses = fireStationRepository.findAddressesByStation(station);
+        List<Person> persons = personRepository.findByAddresses(addresses);
+        List<MedicalRecord> medicalRecords = new ArrayList<>();
+        List<PersonDTO> personDTOs = new ArrayList<>();
 
-        List<PersonDTO> personDTOs = addresses.stream()
-                .flatMap(address -> personRepository.findByAddress(address).stream())
-                .map(person -> {
-                    PersonDTO personDTO = new PersonDTO();
-                    personDTO.setFirstName(person.getFirstName());
-                    personDTO.setLastName(person.getLastName());
-                    personDTO.setPhone(person.getPhone());
-                    personDTO.setAddress(person.getAddress());
-                    return personDTO;
-                })
-                .toList();
 
-        List<LocalDate> birthDates = addresses.stream()
-                .flatMap(address -> personRepository.findByAddress(address).stream())
-                .flatMap(person -> medicalRecordRepository
-                        .findBirthdateByFirstNameAndLastName(person.getFirstName(), person.getLastName()).stream())
-                .toList();
+        for (Person person : persons) {
+            MedicalRecord medicalRecord = medicalRecordRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+            medicalRecords.add(medicalRecord);
+            PersonDTO personDTO = new PersonDTO(person.getFirstName(), person.getLastName(), person.getAddress(), person.getPhone());
+            personDTOs.add(personDTO);
+        }
 
-        LocalDate now = LocalDate.now();
-
-        long minorCount = birthDates.stream()
-                .filter(birthDate -> Period.between(birthDate, now).getYears() < 18)
-                .count();
-
-        long majorCount = birthDates.size() - minorCount;
+        int majorCount = medicalRecordService.countMajorsForMedicalRecords(medicalRecords);
+        int minorCount = medicalRecordService.countMinorsForMedicalRecords(medicalRecords);
 
         PersonWithCountDTO personWithCountDTO = new PersonWithCountDTO();
         personWithCountDTO.setPersonDTOs(personDTOs);
-        personWithCountDTO.setMinorCount((int) minorCount);
-        personWithCountDTO.setMajorCount((int) majorCount);
+        personWithCountDTO.setMinorCount(minorCount);
+        personWithCountDTO.setMajorCount(majorCount);
 
         return personWithCountDTO;
     }
@@ -272,6 +251,8 @@ public class PersonService {
     }
 
     public Person addPerson (Person person){
+        // appel repo si la personne existe deja en fonction firstName and lastName si la personne est null on continue sinon on bloque
+        // clé primaire composite
         if(person.getId()!= 0) {
             throw new IllegalArgumentException("ID is automatically incremented");
         }
@@ -290,28 +271,36 @@ public class PersonService {
 
     @Transactional
     public void deletePerson(Person person) {
-        String firstName = person.getFirstName();
-        String lastName = person.getLastName();
 
-        logger.info("Person deleted: {} {}", firstName, lastName);
+        if(person != null) {
+            String firstName = person.getFirstName();
+            String lastName = person.getLastName();
+            logger.info("Person deleted: {} {}", firstName, lastName);
+            personRepository.deleteByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+        } else {
+            logger.warn("Person wasn't found");
+        }
 
-        personRepository.deleteByFirstNameAndLastName(person.getFirstName(), person.getLastName());
     }
 
     public Person updatePerson (Person person) {
 
-        Person personToUpdate = personRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+        if (person != null) {
+            Person personToUpdate = personRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+            logger.info("Person before update: {}", personToUpdate);
 
-        logger.info("Person before update: {}", personToUpdate);
+            personToUpdate.setAddress(person.getAddress());
+            personToUpdate.setCity(person.getCity());
+            personToUpdate.setZip(person.getZip());
+            personToUpdate.setPhone(person.getPhone());
+            personToUpdate.setEmail(person.getEmail());
 
-        person.setAddress(person.getAddress());
-        person.setCity(person.getCity());
-        person.setZip(person.getZip());
-        person.setPhone(person.getPhone());
-        person.setEmail(person.getEmail());
+            logger.info("Person after updating: {}", personToUpdate);
+            return personRepository.save(personToUpdate);
 
-        logger.info("Person after updating: {}", person);
-
-        return personRepository.save(person);
+        } else {
+            logger.warn("Person wasn't found");
+            return null;
+        }
     }
 }

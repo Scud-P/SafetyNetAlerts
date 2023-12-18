@@ -34,4 +34,8 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             @Param("lastName") String lastName
         );
 
+    List<Person> findAllByAddress(@Param("address") String address);
+
+    @Query("SELECT p FROM Person p WHERE p.address IN :addresses")
+    List<Person> findByAddresses(@Param("addresses") List<String> addresses);
 }

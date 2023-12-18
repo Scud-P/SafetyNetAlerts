@@ -42,26 +42,34 @@ public class MedicalRecordService {
 
     @Transactional
     public void deleteMedicalRecord(MedicalRecord medicalRecord) {
-        String recordFirstName = medicalRecord.getFirstName();
-        String recordLastName = medicalRecord.getLastName();
-        logger.info("Medical Record deleted for {} {}", recordFirstName, recordLastName);
-        medicalRecordRepository.deleteByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
+        if(medicalRecord != null) {
+            String recordFirstName = medicalRecord.getFirstName();
+            String recordLastName = medicalRecord.getLastName();
+
+            logger.info("Medical Record deleted for {} {}", recordFirstName, recordLastName);
+            medicalRecordRepository.deleteByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
+        } else {
+            logger.warn("Medical Record wasn't found");
+        }
+
     }
 
     public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord) {
 
-        MedicalRecord medicalRecordToUpdate = medicalRecordRepository.findByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
+        if(medicalRecord != null) {
 
-        logger.info("Medical Record before update: {}", medicalRecordToUpdate);
+            MedicalRecord medicalRecordToUpdate = medicalRecordRepository.findByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
+            logger.info("Medical Record before update: {}", medicalRecordToUpdate);
+            medicalRecordToUpdate.setBirthdate(medicalRecord.getBirthdate());
+            medicalRecordToUpdate.setAllergies(medicalRecord.getAllergies());
+            medicalRecordToUpdate.setMedications(medicalRecord.getMedications());
+            logger.info("Medical Record after update: {}", medicalRecord);
+            return medicalRecordRepository.save(medicalRecordToUpdate);
 
-        medicalRecord.setBirthdate(medicalRecord.getBirthdate());
-        medicalRecord.setAllergies(medicalRecord.getAllergies());
-        medicalRecord.setMedications(medicalRecord.getMedications());
-
-        logger.info("Medical Record after update: {}", medicalRecord);
-
-        return medicalRecordRepository.save(medicalRecord);
-
+        } else {
+            logger.warn("No medical record was found for that person");
+            return null;
+        }
     }
 
     public MedicalRecord saveMedicalRecord(MedicalRecord medicalRecord) {
@@ -76,4 +84,15 @@ public class MedicalRecordService {
         return medicalRecordRepository.findByBirthdateAfter(date);
     }
 
+    public int countMajorsForMedicalRecords(List<MedicalRecord> medicalRecords) {
+        LocalDate now = LocalDate.now();
+        LocalDate birthdate = now.minusYears(18);
+        return medicalRecordRepository.countMajorsInList(birthdate, medicalRecords);
+    }
+
+    public int countMinorsForMedicalRecords(List<MedicalRecord> medicalRecords) {
+        LocalDate now = LocalDate.now();
+        LocalDate birthdate = now.minusYears(18);
+        return medicalRecordRepository.countMinorsInList(birthdate, medicalRecords);
+    }
 }

@@ -20,10 +20,20 @@ public class FireStationController {
         return fireStationService.getAllFireStations();
     }
 
-//    @PostMapping
-//    public FireStation addFireStation(@RequestBody FireStation fireStation) {
-//        return fireStationService.saveFireStation(fireStation);
-//    }
+    @PostMapping("/firestation")
+    public FireStation addFireStation(@RequestBody FireStation fireStation) {
+        return fireStationService.addFireStation(fireStation);
+    }
+
+    @PutMapping("/firestation")
+    public FireStation updateFireStation(@RequestBody FireStation fireStation) {
+        return fireStationService.updateFireStation(fireStation);
+    }
+
+    @DeleteMapping("/firestation")
+    public void deleteFireStation(@RequestBody FireStation fireStation) {
+        fireStationService.deleteFireStation(fireStation);
+    }
 
     @PostMapping("/batch")
     public List<FireStation> addAllFireStations(@RequestBody List<FireStation> fireStations) {

@@ -1,6 +1,7 @@
 package com.oc.safetynet.alertsapi.repository;
 
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +20,24 @@ public interface MedicalRecordRepository extends JpaRepository <MedicalRecord, L
     void deleteByFirstNameAndLastName(String firstName, String lastName);
 
     MedicalRecord findByFirstNameAndLastName(String firstName, String lastName);
+
+    @Query("SELECT m FROM MedicalRecord m WHERE LOWER(m.firstName) = LOWER(:firstName) AND LOWER (m.lastName) = LOWER(:lastName)")
+    List<MedicalRecord> findAllByFirstNameAndLastName(@Param("firstName") String firstName, @Param("lastName") String lastName);
+
+    @Query("SELECT m FROM MedicalRecord m WHERE LOWER(m.firstName) = LOWER(:firstName) AND LOWER (m.lastName) = LOWER(:lastName) AND m.birthdate > :birthdate")
+    List<MedicalRecord> findByFirstNameAndLastNameAndBirthDateAfter(@Param("firstName") String firstName, @Param("lastName") String lastName, @Param("birthdate") LocalDate birthdate);
+
+
+    @Query("SELECT COUNT(m) FROM MedicalRecord m WHERE m.birthdate <= :birthdate AND m IN :medicalRecords")
+    int countMajorsInList(
+            @Param("birthdate") LocalDate birthdate,
+            @Param("medicalRecords") List<MedicalRecord> medicalRecords
+    );
+
+    @Query("SELECT COUNT(m) FROM MedicalRecord m WHERE m.birthdate > :birthdate AND m IN :medicalRecords")
+    int countMinorsInList(
+            @Param("birthdate") LocalDate birthdate,
+            @Param("medicalRecords") List<MedicalRecord> medicalRecords
+    );
+
 }

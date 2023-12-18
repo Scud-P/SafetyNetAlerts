@@ -17,4 +17,10 @@ public interface FireStationRepository extends JpaRepository<FireStation, Long> 
 
     @Query("SELECT f.station FROM FireStation f WHERE f.address = :address")
     int findStationNumberByAddress(String address);
+
+    FireStation findByAddress(String address);
+
+    FireStation findByStationAndAddress(int station, String address);
+
+    void deleteByAddressAndStation(String address, int station);
 }
