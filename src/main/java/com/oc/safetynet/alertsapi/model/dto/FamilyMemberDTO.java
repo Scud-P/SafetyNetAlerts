@@ -1,6 +1,7 @@
 package com.oc.safetynet.alertsapi.model.dto;
 
 import java.util.List;
+import java.util.Objects;
 
 public class FamilyMemberDTO {
 
@@ -10,6 +11,23 @@ public class FamilyMemberDTO {
     private int age;
     private List<String> allergies;
     private List<String> medications;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FamilyMemberDTO that = (FamilyMemberDTO) o;
+        return age == that.age &&
+                Objects.equals(firstName, that.firstName) &&
+                Objects.equals(lastName, that.lastName) &&
+                Objects.equals(phone, that.phone) &&
+                Objects.equals(allergies, that.allergies) &&
+                Objects.equals(medications, that.medications);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, lastName, phone, age, allergies, medications);
+    }
 
     public FamilyMemberDTO(String firstName, String lastName, String phone, int age, List<String> allergies, List<String> medications) {
         this.firstName = firstName;

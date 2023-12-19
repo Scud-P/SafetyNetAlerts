@@ -267,12 +267,13 @@ public class PersonControllerTest {
     @Test
     public void testAddPerson() throws Exception {
 
-        Person personToAdd = new Person(1L, "Bob", "Dylan", "test address", "test city", "test zip", "test phone", "test email");
-        when(personService.savePerson(any(Person.class))).thenReturn(personToAdd);
+        Person person = new Person(1L, "Bob", "Dylan", "test address", "test city", "test zip", "test phone", "test email");
+
+        when(personService.addPerson(any(Person.class))).thenReturn(person);
 
         mockMvc.perform(post("/person")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(personToAdd)))
+                .content(objectMapper.writeValueAsString(person)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("Bob"))
                 .andExpect(jsonPath("$.lastName").value("Dylan"))

@@ -253,20 +253,26 @@ public class PersonService {
     public Person addPerson (Person person){
         // appel repo si la personne existe deja en fonction firstName and lastName si la personne est null on continue sinon on bloque
         // clé primaire composite
+
+        Person personToAdd = personRepository.getByFirstNameAndLastName(person.getFirstName(), person.getLastName());
         if(person.getId()!= 0) {
             throw new IllegalArgumentException("ID is automatically incremented");
         }
-        person.setFirstName(person.getFirstName());
-        person.setLastName(person.getLastName());
-        person.setAddress(person.getAddress());
-        person.setCity(person.getCity());
-        person.setZip(person.getZip());
-        person.setPhone(person.getPhone());
-        person.setEmail(person.getEmail());
+        if (personToAdd != null) {
+            throw new IllegalArgumentException("Person with the same first name and last name already exists");
+        } else {
+            person.setFirstName(person.getFirstName());
+            person.setLastName(person.getLastName());
+            person.setAddress(person.getAddress());
+            person.setCity(person.getCity());
+            person.setZip(person.getZip());
+            person.setPhone(person.getPhone());
+            person.setEmail(person.getEmail());
 
-        logger.info("Person added: {}", person);
+            logger.info("Person added: {}", person);
 
-        return personRepository.save(person);
+            return personRepository.save(person);
+        }
     }
 
     @Transactional
@@ -302,5 +308,10 @@ public class PersonService {
             logger.warn("Person wasn't found");
             return null;
         }
+    }
+
+    public Person getPersonByFirstNameAndLastName(String firstName, String lastName) {
+        return personRepository.getByFirstNameAndLastName(firstName, lastName);
+
     }
 }

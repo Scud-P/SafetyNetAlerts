@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.oc.safetynet.alertsapi")
 public class AlertsapiApplication implements CommandLineRunner {
 
 	@Autowired

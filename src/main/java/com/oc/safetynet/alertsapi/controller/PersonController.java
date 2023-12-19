@@ -21,6 +21,11 @@ public class PersonController {
         return personService.getAllPersons();
     }
 
+    @GetMapping("/person")
+    public Person getPerson(@RequestParam(name = "firstName") String firstName, @RequestParam(name = "lastName") String lastName) {
+        return personService.getPersonByFirstNameAndLastName(firstName, lastName);
+    }
+
     @PostMapping("/person")
     public Person addPerson(@RequestBody Person person) {
         return personService.addPerson(person);
