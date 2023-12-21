@@ -5,6 +5,7 @@ import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
 import com.oc.safetynet.alertsapi.controller.PersonController;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
+import com.oc.safetynet.alertsapi.model.dto.ChildDTO;
 import com.oc.safetynet.alertsapi.model.dto.FamilyMemberDTO;
 import com.oc.safetynet.alertsapi.model.dto.HomeDTO;
 import com.oc.safetynet.alertsapi.repository.FireStationRepository;
@@ -17,22 +18,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cglib.core.Local;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @WebMvcTest(PersonService.class)
@@ -67,6 +64,184 @@ public class PersonServiceTest {
 
     @MockBean
     private MedicalRecordRepository medicalRecordRepository;
+
+
+    @Test
+    public void testFindMinorsAtAddress () {
+
+        LocalDate now = LocalDate.now();
+        LocalDate eighteenYearsAgo = now.minusYears(18);
+
+        String address = "test address";
+
+        List<Person> personsAtAddress = List.of(
+                new Person(1L, "John", "Doe", "address", "test city", "test zip", "test phone", "test email"),
+                new Person(2L, "John", "Smith", "address", "test city", "test zip", "test phone", "test email")
+        );
+
+        when(personRepository.findByAddress(address)).thenReturn(personsAtAddress);
+
+        List<ChildDTO> childDTOS = new ArrayList<>();
+
+        LocalDate johnDoeDate = now.minusYears(40);
+        LocalDate johnSmithDate = now.minusYears(8);
+
+        List<String> allergiesJohnDoe = new ArrayList<>();
+        allergiesJohnDoe.add("Capitalism");
+        allergiesJohnDoe.add("Pop Music");
+        List<String> medicationsJohnDoe = new ArrayList<>();
+        medicationsJohnDoe.add("Reggae");
+        medicationsJohnDoe.add("Women");
+
+
+        List<String> allergiesJohnSmith = new ArrayList<>();
+        allergiesJohnSmith.add("Shellfish");
+        allergiesJohnSmith.add("Gluten");
+        List<String> medicationsJohnSmith = new ArrayList<>();
+        medicationsJohnSmith.add("Prozac 30mg");
+        medicationsJohnSmith.add("Viagra 10mg");
+
+        List<MedicalRecord> medicalRecords = List.of(
+                new MedicalRecord(1L, "John", "Doe", johnDoeDate, allergiesJohnDoe, medicationsJohnDoe),
+                new MedicalRecord(2L, "John", "Smith", johnSmithDate, allergiesJohnSmith, medicationsJohnSmith)
+        );
+
+        for(Person person : personsAtAddress) {
+            when(medicalRecordRepository.findByFirstNameAndLastNameAndBirthDateAfter(person.getFirstName(), person.getLastName(), eighteenYearsAgo)).thenReturn(medicalRecords);
+            for (MedicalRecord medicalRecord : medicalRecords) {
+                if(isSamePerson(medicalRecord, person)) {
+                    int age = calculateAge(medicalRecord.getBirthdate());
+                    ChildDTO childDTO = new ChildDTO();
+                    childDTO.setFirstName(person.getFirstName());
+                    childDTO.setLastName(person.getLastName());
+                    childDTO.setAge(age);
+
+                    List<Person> familyMembers = new ArrayList<>(personsAtAddress);
+                    familyMembers.removeIf(p -> isSamePerson(medicalRecord, p));
+                    childDTO.setFamilyMembers(familyMembers);
+                    childDTOS.add(childDTO);
+                }
+            }
+        }
+        personService.findMinorsAtAddress(address);
+
+        verify(medicalRecordRepository, times(2)).findByFirstNameAndLastNameAndBirthDateAfter(anyString(), anyString(), any());
+        verify(personRepository, times(1)).findByAddress(address);
+    }
+
+    @Test
+    public void testFindPhonesByStation() {
+
+        int station = 1;
+
+        List<String> addresses = List.of("address1, address2");
+        List<String> phones = List.of("phone1", "phone2", "phone3", "phone4");
+
+        when(fireStationRepository.findAddressesByStation(station)).thenReturn(addresses);
+        when(personRepository.findPhoneByAddresses(addresses)).thenReturn(phones);
+
+        List<String> results = personService.findPhonesByStation(station);
+
+        assertNotNull(results);
+        assertThat(results).hasSize(4);
+
+        verify(fireStationRepository, times(1)).findAddressesByStation(station);
+        verify(personRepository, times(1)).findPhoneByAddresses(addresses);
+
+    }
+
+    @Test
+    public void testGetAllPersons() {
+
+        List<Person> persons = List.of(
+                new Person(1L, "John", "Doe", "address", "test city", "test zip", "test phone", "test email"),
+                new Person(1L, "John", "Smith", "address", "test city", "test zip", "test phone", "test email")
+        );
+
+        when(personRepository.findAll()).thenReturn(persons);
+
+        List<Person> result = personService.getAllPersons();
+
+        assertNotNull(result);
+        assertThat(result).hasSize(2);
+
+        verify(personRepository, times(1)).findAll();
+
+    }
+
+    @Test
+    public void testCalculateAge() {
+        LocalDate now = LocalDate.now();
+        LocalDate birthDate;
+        birthDate = now.minusYears(20);
+        int age = (int) ChronoUnit.YEARS.between(birthDate, now);
+        int actualAge = personService.calculateAge(birthDate);
+        assertEquals(actualAge, age);
+    }
+
+    @Test
+    public void testAddPersonNoExistingPerson() {
+        Person personToAdd = new Person();
+
+        personToAdd.setFirstName("John");
+        personToAdd.setLastName("Doe");
+        personToAdd.setAddress("test address");
+        personToAdd.setCity("test city");
+        personToAdd.setZip("test zip");
+        personToAdd.setPhone("test phone");
+        personToAdd.setEmail("test email");
+        when(personRepository.getByFirstNameAndLastName(anyString(), anyString())).thenReturn(null);
+
+        personService.addPerson(personToAdd);
+
+        verify(personRepository, times(1)).getByFirstNameAndLastName("John", "Doe");
+        verify(personRepository, times(1)).save(personToAdd);
+    }
+
+    @Test
+    public void testAddPersonExistingPerson() {
+        Person personToAdd = new Person();
+
+        personToAdd.setFirstName("John");
+        personToAdd.setLastName("Doe");
+        personToAdd.setAddress("test address");
+        personToAdd.setCity("test city");
+        personToAdd.setZip("test zip");
+        personToAdd.setPhone("test phone");
+        personToAdd.setEmail("test email");
+
+        when(personRepository.getByFirstNameAndLastName(anyString(), anyString())).thenReturn(personToAdd);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            personService.addPerson(personToAdd);
+        });
+
+        verify(personRepository, times(1)).getByFirstNameAndLastName("John", "Doe");
+        verify(personRepository, times(0)).save(personToAdd);
+    }
+
+    @Test
+    public void testAddPersonSpecifiedID() {
+        Person personToAdd = new Person();
+
+        personToAdd.setId(1);
+        personToAdd.setFirstName("John");
+        personToAdd.setLastName("Doe");
+        personToAdd.setAddress("test address");
+        personToAdd.setCity("test city");
+        personToAdd.setZip("test zip");
+        personToAdd.setPhone("test phone");
+        personToAdd.setEmail("test email");
+
+        when(personRepository.getByFirstNameAndLastName(anyString(), anyString())).thenReturn(personToAdd);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            personService.addPerson(personToAdd);
+        });
+
+        verify(personRepository, times(1)).getByFirstNameAndLastName("John", "Doe");
+        verify(personRepository, times(0)).save(personToAdd);
+    }
 
 
     @Test
@@ -160,11 +335,18 @@ public class PersonServiceTest {
 
         List<HomeDTO> result = personService.findHomesByStation(station);
 
+        assertThat(result).isNotNull();
+        assertThat(result).isNotEmpty();
         verify(medicalRecordRepository, times(4)).findByFirstNameAndLastName(anyString(), anyString());
+        verify(personRepository, times(2)).findByAddress(anyString());
     }
 
     private int calculateAge(LocalDate birthdate) {
         return Period.between(birthdate, LocalDate.now()).getYears();
+    }
+
+    private boolean isSamePerson(MedicalRecord medicalRecord, Person person) {
+        return medicalRecord.getFirstName().equals(person.getFirstName()) && medicalRecord.getLastName().equals(person.getLastName());
     }
 
 }

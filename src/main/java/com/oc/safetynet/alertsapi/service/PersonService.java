@@ -41,25 +41,8 @@ public class PersonService {
         return personRepository.findAll();
     }
 
-    public Person savePerson(Person person) {
-        return personRepository.save(person);
-    }
-
     public List<Person> saveAllPersons(List<Person> persons) {
         return personRepository.saveAll(persons);
-    }
-
-    public List<Person> getPersonsByStation(int station) {
-        List<FireStation> fireStations = fireStationRepository.findByStation(station);
-        List<Person> persons = new ArrayList<>();
-        if (fireStations != null) {
-            for (FireStation fireStation : fireStations) {
-                persons.addAll(personRepository.findAll().stream()
-                        .filter(person -> person.getAddress().equals(fireStation.getAddress())).toList());
-            }
-        }
-        logger.info("Content of Persons : {}", persons);
-        return persons;
     }
 
     public List<String> findPhonesByStation(int station) {
@@ -216,28 +199,12 @@ public class PersonService {
         return personWithCountDTO;
     }
 
-    public List <LocalDate> findBirthDates (String firstName, String lastName) {
-        return medicalRecordRepository.findBirthdateByFirstNameAndLastName(firstName, lastName);
-    }
 
     private boolean isSamePerson(MedicalRecord medicalRecord, Person person) {
         return medicalRecord.getFirstName().equals(person.getFirstName()) && medicalRecord.getLastName().equals(person.getLastName());
     }
 
-    private List<Person> findMatchingPersons(MedicalRecord medicalRecord, String address) {
-        return personRepository.findAll().stream()
-                .filter(person -> isSamePerson(medicalRecord, person) && person.getAddress().equals(address))
-                .collect(Collectors.toList());
-    }
-
-    private MedicalRecord findMatchingMedicalRecord(Person person, List<MedicalRecord> medicalRecords) {
-        return medicalRecords.stream()
-                .filter(medicalRecord -> isSamePerson(medicalRecord, person))
-                .findFirst()
-                .orElseThrow();
-    }
-
-    private int calculateAge(LocalDate birthdate) {
+    public int calculateAge(LocalDate birthdate) {
         LocalDate now = LocalDate.now();
         return (int) ChronoUnit.YEARS.between(birthdate, now);
     }
