@@ -13,15 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
-@Data
 public class PersonService {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
@@ -210,9 +207,7 @@ public class PersonService {
     }
 
     public List<String> findEmailsByCity(String city) {
-        List<String> emails = personRepository.findEmailsByCity(city).stream()
-                        .distinct()
-                .toList();
+        List<String> emails = personRepository.findEmailsByCity(city);
         logger.info("Emails for City {}: {}", city, emails);
         return emails;
     }
@@ -245,7 +240,9 @@ public class PersonService {
     @Transactional
     public void deletePerson(Person person) {
 
-        if(person != null) {
+        Person personToDelete = personRepository.getByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+
+        if(personToDelete != null) {
             String firstName = person.getFirstName();
             String lastName = person.getLastName();
             logger.info("Person deleted: {} {}", firstName, lastName);

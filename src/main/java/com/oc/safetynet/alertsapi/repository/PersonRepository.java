@@ -25,7 +25,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     @Query("SELECT DISTINCT p.phone FROM Person p WHERE p.address in :addresses")
     List<String> findPhoneByAddresses(@Param("addresses") List<String> addresses);
 
-    @Query("SELECT p.email FROM Person p WHERE LOWER(p.city) = LOWER(:city)")
+    @Query("SELECT DISTINCT p.email FROM Person p WHERE LOWER(p.city) = LOWER(:city)")
     List<String> findEmailsByCity(@Param("city") String city);
 
     @Query("SELECT p FROM Person p WHERE LOWER(p.firstName) = LOWER(:firstName) AND LOWER(p.lastName) = LOWER(:lastName)")

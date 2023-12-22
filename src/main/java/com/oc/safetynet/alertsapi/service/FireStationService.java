@@ -53,23 +53,10 @@ public class FireStationService {
             logger.warn("No Fire Station mapping was found for this address");
             return null;
         }
-
-    }
-
-    public FireStation saveFireStation(FireStation firestation) {
-        return fireStationRepository.save(firestation);
     }
 
     public List<FireStation> saveAllFireStations(List<FireStation> firestations) {
         return fireStationRepository.saveAll(firestations);
-    }
-
-    public int getFireStationByAddress(String address) {
-        return fireStationRepository.findStationNumberByAddress(address);
-    }
-
-    public List<String> getAddressesByStation(int station) {
-        return fireStationRepository.findAddressesByStation(station);
     }
 
 }

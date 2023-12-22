@@ -21,6 +21,8 @@ public interface MedicalRecordRepository extends JpaRepository <MedicalRecord, L
 
     MedicalRecord findByFirstNameAndLastName(String firstName, String lastName);
 
+    MedicalRecord getByFirstNameAndLastName(String firstName, String lastName);
+
     @Query("SELECT m FROM MedicalRecord m WHERE LOWER(m.firstName) = LOWER(:firstName) AND LOWER (m.lastName) = LOWER(:lastName)")
     List<MedicalRecord> findAllByFirstNameAndLastName(@Param("firstName") String firstName, @Param("lastName") String lastName);
 

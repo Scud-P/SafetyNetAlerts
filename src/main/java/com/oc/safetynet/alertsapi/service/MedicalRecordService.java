@@ -1,9 +1,7 @@
 package com.oc.safetynet.alertsapi.service;
 
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
-import com.oc.safetynet.alertsapi.model.Person;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -26,9 +24,13 @@ public class MedicalRecordService {
     }
 
     public MedicalRecord addMedicalRecord (MedicalRecord medicalRecord){
-        if(medicalRecord.getId()!= 0) {
-            throw new IllegalArgumentException("ID is automatically incremented");
+
+        MedicalRecord medicalRecordToAdd = medicalRecordRepository.getByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
+
+        if(medicalRecordToAdd != null) {
+            throw new IllegalArgumentException("Medical Record with the same first name and last name already exists");
         }
+
         medicalRecord.setFirstName(medicalRecord.getFirstName());
         medicalRecord.setLastName(medicalRecord.getLastName());
         medicalRecord.setBirthdate(medicalRecord.getBirthdate());
@@ -72,16 +74,8 @@ public class MedicalRecordService {
         }
     }
 
-    public MedicalRecord saveMedicalRecord(MedicalRecord medicalRecord) {
-        return medicalRecordRepository.save(medicalRecord);
-    }
-
     public List<MedicalRecord> saveAllMedicalRecords(List<MedicalRecord> medicalRecords) {
         return medicalRecordRepository.saveAll(medicalRecords);
-    }
-
-    public List<MedicalRecord> findMedicalRecordBornAfter(LocalDate date) {
-        return medicalRecordRepository.findByBirthdateAfter(date);
     }
 
     public int countMajorsForMedicalRecords(List<MedicalRecord> medicalRecords) {
