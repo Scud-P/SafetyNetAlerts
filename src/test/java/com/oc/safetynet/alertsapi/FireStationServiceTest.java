@@ -8,6 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -76,6 +80,26 @@ public class FireStationServiceTest {
         fireStationService.deleteFireStation(fireStationToDelete);
 
         verify(fireStationRepository, times(1)).deleteByAddressAndStation("test address", 1);
+    }
+
+    @Test
+    public void testGetAllFireStations() {
+
+        List<FireStation> stations = List.of(
+                new FireStation(1L, "address1", 1),
+                new FireStation(2L, "address2", 2),
+                new FireStation(3L, "address3", 3)
+        );
+
+        when(fireStationRepository.findAll()).thenReturn(stations);
+
+        List<FireStation> results = fireStationService.getAllFireStations();
+
+        assertNotNull(results);
+        assertThat(results).hasSize(3);
+
+        verify(fireStationRepository, times(1)).findAll();
+
     }
 
 }

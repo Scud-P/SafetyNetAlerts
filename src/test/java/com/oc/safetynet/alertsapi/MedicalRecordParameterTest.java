@@ -54,17 +54,17 @@ public class MedicalRecordParameterTest {
         List<String> allergies = List.of("allergy1", "allergy2");
         List<String> medications = List.of("medication1", "medication2");
 
-        MedicalRecordParameter medicalRecordParameter = new MedicalRecordParameter("bob", "dylan", "01/01/2001", medications, allergies);
+        MedicalRecordParameter medicalRecordParameter = new MedicalRecordParameter("bob", "dylan", "1990-01-01", medications, allergies);
 
         MedicalRecord medicalRecord = medicalRecordParameter.toMedicalRecord();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        LocalDate bobDate = LocalDate.parse(medicalRecordParameter.getBirthdate(), formatter);
+        System.out.println(medicalRecord.getBirthdate());
+
 
         assertNotNull(medicalRecord);
         assertEquals("bob", medicalRecord.getFirstName());
         assertEquals("dylan", medicalRecord.getLastName());
-        assertEquals(bobDate, medicalRecord.getBirthdate());
+        assertEquals("1990-01-01", medicalRecord.getBirthdate().toString());
         assertEquals(allergies, medicalRecord.getAllergies());
         assertEquals(medications, medicalRecord.getMedications());
     }

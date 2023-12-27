@@ -3,7 +3,6 @@ package com.oc.safetynet.alertsapi.model.parameter;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class MedicalRecordParameter {
@@ -29,8 +28,7 @@ public class MedicalRecordParameter {
         MedicalRecord medicalRecord = new MedicalRecord();
         medicalRecord.setFirstName(this.firstName);
         medicalRecord.setLastName(this.lastName);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        medicalRecord.setBirthdate(LocalDate.parse(this.birthdate, formatter));
+        medicalRecord.setBirthdate(LocalDate.parse(this.birthdate));
         medicalRecord.setAllergies(this.allergies);
         medicalRecord.setMedications(this.medications);
         return medicalRecord;

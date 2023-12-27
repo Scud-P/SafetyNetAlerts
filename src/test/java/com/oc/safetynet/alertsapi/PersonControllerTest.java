@@ -2,12 +2,13 @@ package com.oc.safetynet.alertsapi;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.oc.safetynet.alertsapi.controller.FireStationController;
 import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
 import com.oc.safetynet.alertsapi.controller.PersonController;
@@ -332,5 +333,47 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("$[1].age").value(21))
                 .andExpect(jsonPath("$[2].allergies[0]").value("Penicillin"))
                 .andExpect(jsonPath("$[0].medications[1]").value("Women"));
+    }
+
+    @Test
+    public void testUpdatePerson() throws Exception {
+
+        Person person = new Person(1L, "Bob", "Dylan", "test address", "test city", "test zip", "test phone", "test email");
+
+        when(personService.updatePerson(any(Person.class))).thenReturn(person);
+
+        mockMvc.perform(put("/person")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(person)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Bob"))
+                .andExpect(jsonPath("$.lastName").value("Dylan"))
+                .andExpect(jsonPath("$.address").value("test address"))
+                .andExpect(jsonPath("$.city").value("test city"))
+                .andExpect(jsonPath("$.zip").value("test zip"))
+                .andExpect(jsonPath("$.phone").value("test phone"))
+                .andExpect(jsonPath("$.email").value("test email"));
+    }
+
+    @Test
+    public void testGetPerson() throws Exception {
+        Person person = new Person(1L, "Bob", "Dylan", "test address", "test city", "test zip", "test phone", "test email");
+        when(personService.getPersonByFirstNameAndLastName(anyString(), anyString())).thenReturn(person);
+        mockMvc.perform(get("/person")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(person))
+                        .param("firstName", person.getFirstName())
+                        .param("lastName", person.getLastName()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Bob"))
+                .andExpect(jsonPath("$.lastName").value("Dylan"))
+                .andExpect(jsonPath("$.address").value("test address"))
+                .andExpect(jsonPath("$.city").value("test city"))
+                .andExpect(jsonPath("$.zip").value("test zip"))
+                .andExpect(jsonPath("$.phone").value("test phone"))
+                .andExpect(jsonPath("$.email").value("test email"));
+
+
+
     }
 }

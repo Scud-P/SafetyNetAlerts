@@ -1,11 +1,9 @@
 package com.oc.safetynet.alertsapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
-import com.oc.safetynet.alertsapi.controller.PersonController;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
-import com.oc.safetynet.alertsapi.model.Person;
+import com.oc.safetynet.alertsapi.model.parameter.MedicalRecordParameter;
 import com.oc.safetynet.alertsapi.repository.FireStationRepository;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import com.oc.safetynet.alertsapi.service.MedicalRecordService;
@@ -13,7 +11,6 @@ import com.oc.safetynet.alertsapi.service.PersonService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
@@ -26,9 +23,8 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -109,36 +105,63 @@ public class MedicalRecordControllerTest {
 
     }
 
-//    @Test
-//    public void testAddMedicalRecord() throws Exception {
-//
-//        List<String> allergiesBob = new ArrayList<>();
-//        allergiesBob.add("Capitalism");
-//        allergiesBob.add("Pop Music");
-//        List<String> medicationsBob = new ArrayList<>();
-//        medicationsBob.add("Reggae");
-//        medicationsBob.add("Women");
-//
-//        LocalDate now = LocalDate.now();
-//        LocalDate bobBirthDate = now.minusYears(20);
-//
-//        MedicalRecord medicalRecordToAdd = new MedicalRecord(1L, "Bob", "Bober", bobBirthDate, medicationsBob, allergiesBob);
-//
-//        when(medicalRecordService.saveMedicalRecord(any(MedicalRecord.class))).thenReturn(medicalRecordToAdd);
-//
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//
-//
-//        mockMvc.perform(post("/medicalrecord")
-//                .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.firstName").value("Bob"))
-//                .andExpect(jsonPath("$.lastName").value("Bober"))
-//                .andExpect(jsonPath("$.birthdate").value(bobBirthDate.format(formatter)))
-//                .andExpect(jsonPath("$.medications[0]").value("Reggae"))
-//                .andExpect(jsonPath("$.allergies[1]").value("Pop Music"))
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andReturn().getResponse().getContentAsString();;
-//    }
+    @Test
+    public void testAddMedicalRecord() throws Exception {
+
+        List<String> allergiesBob = new ArrayList<>();
+        allergiesBob.add("Capitalism");
+        allergiesBob.add("Pop Music");
+        List<String> medicationsBob = new ArrayList<>();
+        medicationsBob.add("Reggae");
+        medicationsBob.add("Women");
+
+        MedicalRecordParameter mrp = new MedicalRecordParameter("Bob", "Bober", "1990-01-01", medicationsBob, allergiesBob);
+
+        MedicalRecord medicalRecord = mrp.toMedicalRecord();
+
+
+        when(medicalRecordService.addMedicalRecord(any(MedicalRecord.class))).thenReturn(medicalRecord);
+
+        mockMvc.perform(post("/medicalRecord")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(medicalRecord)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Bob"))
+                .andExpect(jsonPath("$.lastName").value("Bober"))
+                .andExpect(jsonPath("$.medications[0]").value("Reggae"))
+                .andExpect(jsonPath("$.allergies[1]").value("Pop Music"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+        ;
+    }
+
+    @Test
+    public void testUpdateMedicalRecord() throws Exception {
+
+        List<String> allergiesBob = new ArrayList<>();
+        allergiesBob.add("Capitalism");
+        allergiesBob.add("Pop Music");
+        List<String> medicationsBob = new ArrayList<>();
+        medicationsBob.add("Reggae");
+        medicationsBob.add("Women");
+
+        MedicalRecordParameter mrp = new MedicalRecordParameter("Bob", "Bober", "1990-01-01", medicationsBob, allergiesBob);
+
+        MedicalRecord medicalRecord = mrp.toMedicalRecord();
+
+
+        when(medicalRecordService.updateMedicalRecord(any(MedicalRecord.class))).thenReturn(medicalRecord);
+
+        mockMvc.perform(put("/medicalRecord")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(medicalRecord)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Bob"))
+                .andExpect(jsonPath("$.lastName").value("Bober"))
+                .andExpect(jsonPath("$.medications[0]").value("Reggae"))
+                .andExpect(jsonPath("$.allergies[1]").value("Pop Music"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+    }
 
 }

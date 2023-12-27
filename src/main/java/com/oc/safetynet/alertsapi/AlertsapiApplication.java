@@ -66,4 +66,11 @@ public class AlertsapiApplication implements CommandLineRunner {
 			System.out.println("Error reading data from JSON file" + e.getMessage());
 		}
 	}
+
+	//TODO Surefire reports
+	//TODO Actuators health, info, trace, metrics
+	//TODO Controller tests
+	//TODO Successful Queries -> Log Info
+	//TODO Exceptions and Errors -> Log Error
+	//TODO Steps and Logic -> Log Debug
 }

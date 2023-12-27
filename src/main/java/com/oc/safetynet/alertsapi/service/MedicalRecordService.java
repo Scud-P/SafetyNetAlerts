@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 public class MedicalRecordService {
-    private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
+    private static final Logger logger = LoggerFactory.getLogger(MedicalRecordService.class);
 
     @Autowired
     private MedicalRecordRepository medicalRecordRepository;
