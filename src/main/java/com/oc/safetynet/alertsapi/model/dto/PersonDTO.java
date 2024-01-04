@@ -50,4 +50,14 @@ public class PersonDTO {
         this.phone = phone;
     }
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("PersonDTO{");
+        sb.append("firstName='").append(firstName).append('\'');
+        sb.append(", lastName='").append(lastName).append('\'');
+        sb.append(", address='").append(address).append('\'');
+        sb.append(", phone='").append(phone).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

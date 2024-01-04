@@ -48,4 +48,13 @@ public class FireStation {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("FireStation{");
+        sb.append("id=").append(id);
+        sb.append(", address='").append(address).append('\'');
+        sb.append(", station=").append(station);
+        sb.append('}');
+        return sb.toString();
+    }
 }

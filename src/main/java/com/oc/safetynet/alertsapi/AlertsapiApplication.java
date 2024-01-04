@@ -48,28 +48,26 @@ public class AlertsapiApplication implements CommandLineRunner {
 		try {
 			InputStream inputStream = getClass().getResourceAsStream("/data.json");
 			Data data = objectMapper.readValue(inputStream, Data.class);
-			logger.info("Content of JSON source files: {}", data);
+			logger.debug("Content of JSON source files: {}", data);
 
 			List<Person> persons = data.getPersons();
 			personController.addAllPersons(persons);
-			logger.info("Persons: {} ", persons);
+			logger.debug("Persons: {} ", persons);
 
 			List<MedicalRecord> medicalrecords = data.getMedicalrecords();
 			medicalRecordController.addAllMedicalRecords(medicalrecords);
-			logger.info("Medical Records: {} ", medicalrecords);
+			logger.debug("Medical Records: {} ", medicalrecords);
 
 			List<FireStation> firestations = data.getFirestations();
 			fireStationController.addAllFireStations(firestations);
-			logger.info("Firestations: {} ", firestations);
+			logger.debug("Firestations: {} ", firestations);
 
 		} catch (IOException e) {
-			System.out.println("Error reading data from JSON file" + e.getMessage());
+			logger.error("Error reading data from JSON file" + e.getMessage());
 		}
 	}
 
 	//TODO Surefire reports
-	//TODO Actuators health, info, trace, metrics
-	//TODO Controller tests
 	//TODO Successful Queries -> Log Info
 	//TODO Exceptions and Errors -> Log Error
 	//TODO Steps and Logic -> Log Debug

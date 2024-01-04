@@ -72,4 +72,16 @@ public class PersonFireDTO {
     private List<String> medications;
     private List<String> allergies;
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("PersonFireDTO{");
+        sb.append("firstName='").append(firstName).append('\'');
+        sb.append(", lastName='").append(lastName).append('\'');
+        sb.append(", phone='").append(phone).append('\'');
+        sb.append(", age=").append(age);
+        sb.append(", medications=").append(medications);
+        sb.append(", allergies=").append(allergies);
+        sb.append('}');
+        return sb.toString();
+    }
 }

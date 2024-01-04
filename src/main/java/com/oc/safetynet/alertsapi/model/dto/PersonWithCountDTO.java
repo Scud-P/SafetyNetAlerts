@@ -44,4 +44,13 @@ public class PersonWithCountDTO {
         this.majorCount = majorCount;
     }
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("PersonWithCountDTO{");
+        sb.append("personDTOs=").append(personDTOs);
+        sb.append(", minorCount=").append(minorCount);
+        sb.append(", majorCount=").append(majorCount);
+        sb.append('}');
+        return sb.toString();
+    }
 }

@@ -1,5 +1,6 @@
 package com.oc.safetynet.alertsapi.service;
 
+import com.oc.safetynet.alertsapi.exception.MedicalRecordNotFoundException;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ public class MedicalRecordService {
         MedicalRecord medicalRecordToAdd = medicalRecordRepository.getByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
 
         if(medicalRecordToAdd != null) {
+            logger.error("Medical Record with the same first name and last name already exists");
             throw new IllegalArgumentException("Medical Record with the same first name and last name already exists");
         }
 
@@ -44,34 +46,49 @@ public class MedicalRecordService {
 
     @Transactional
     public void deleteMedicalRecord(MedicalRecord medicalRecord) {
-        if(medicalRecord != null) {
-            String recordFirstName = medicalRecord.getFirstName();
-            String recordLastName = medicalRecord.getLastName();
 
-            logger.info("Medical Record deleted for {} {}", recordFirstName, recordLastName);
-            medicalRecordRepository.deleteByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
-        } else {
-            logger.warn("Medical Record wasn't found");
+        if(medicalRecord == null) {
+            logger.error("Invalid input: medicalRecord is null");
+            throw new IllegalArgumentException("Invalid input: medicalRecord is null");
         }
 
+        MedicalRecord medicalRecordToDelete = medicalRecordRepository.findByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
+
+        if(medicalRecordToDelete == null) {
+            logger.error("No medical record was found for person {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
+            throw new MedicalRecordNotFoundException(
+                    String.format("No medical record was found for person %s %s",
+                            medicalRecord.getFirstName(), medicalRecord.getLastName()));
+        }
+            String recordFirstName = medicalRecord.getFirstName();
+            String recordLastName = medicalRecord.getLastName();
+            logger.info("Medical Record deleted for {} {}", recordFirstName, recordLastName);
+            medicalRecordRepository.deleteByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
     }
 
     public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord) {
-
-        if(medicalRecord != null) {
-
-            MedicalRecord medicalRecordToUpdate = medicalRecordRepository.findByFirstNameAndLastName(medicalRecord.getFirstName(), medicalRecord.getLastName());
-            logger.info("Medical Record before update: {}", medicalRecordToUpdate);
-            medicalRecordToUpdate.setBirthdate(medicalRecord.getBirthdate());
-            medicalRecordToUpdate.setAllergies(medicalRecord.getAllergies());
-            medicalRecordToUpdate.setMedications(medicalRecord.getMedications());
-            logger.info("Medical Record after update: {}", medicalRecord);
-            return medicalRecordRepository.save(medicalRecordToUpdate);
-
-        } else {
-            logger.warn("No medical record was found for that person");
-            return null;
+        if (medicalRecord == null) {
+            logger.error("Invalid input: medicalRecord is null");
+            throw new IllegalArgumentException("Invalid input: medicalRecord is null");
         }
+
+        MedicalRecord medicalRecordToUpdate = medicalRecordRepository.findByFirstNameAndLastName(
+                medicalRecord.getFirstName(), medicalRecord.getLastName());
+
+        if (medicalRecordToUpdate == null) {
+            logger.error("No medical record was found for person {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
+            throw new MedicalRecordNotFoundException(
+                    String.format("No medical record was found for person %s %s",
+                            medicalRecord.getFirstName(), medicalRecord.getLastName()));
+        }
+
+        logger.info("Medical Record before update: {}", medicalRecordToUpdate);
+        medicalRecordToUpdate.setBirthdate(medicalRecord.getBirthdate());
+        medicalRecordToUpdate.setAllergies(medicalRecord.getAllergies());
+        medicalRecordToUpdate.setMedications(medicalRecord.getMedications());
+        logger.info("Medical Record after update: {}", medicalRecord);
+
+        return medicalRecordRepository.save(medicalRecordToUpdate);
     }
 
     public List<MedicalRecord> saveAllMedicalRecords(List<MedicalRecord> medicalRecords) {

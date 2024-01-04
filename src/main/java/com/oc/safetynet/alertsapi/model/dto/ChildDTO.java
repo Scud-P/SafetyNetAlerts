@@ -53,4 +53,14 @@ public class ChildDTO {
         this.familyMembers = familyMembers;
     }
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("ChildDTO{");
+        sb.append("firstName='").append(firstName).append('\'');
+        sb.append(", lastName='").append(lastName).append('\'');
+        sb.append(", age=").append(age);
+        sb.append(", familyMembers=").append(familyMembers);
+        sb.append('}');
+        return sb.toString();
+    }
 }

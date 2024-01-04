@@ -31,4 +31,12 @@ public class PersonFireWithStationNumberDTO {
     private int station;
     private List<PersonFireDTO> personFireDTOs;
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("PersonFireWithStationNumberDTO{");
+        sb.append("station=").append(station);
+        sb.append(", personFireDTOs=").append(personFireDTOs);
+        sb.append('}');
+        return sb.toString();
+    }
 }

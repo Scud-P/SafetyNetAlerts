@@ -81,4 +81,18 @@ public class PersonInfoDTO {
     public void setMedications(List<String> medications) {
         this.medications = medications;
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("PersonInfoDTO{");
+        sb.append("firstName='").append(firstName).append('\'');
+        sb.append(", lastName='").append(lastName).append('\'');
+        sb.append(", address='").append(address).append('\'');
+        sb.append(", email='").append(email).append('\'');
+        sb.append(", age=").append(age);
+        sb.append(", allergies=").append(allergies);
+        sb.append(", medications=").append(medications);
+        sb.append('}');
+        return sb.toString();
+    }
 }

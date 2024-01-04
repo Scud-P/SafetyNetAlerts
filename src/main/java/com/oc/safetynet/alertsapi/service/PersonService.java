@@ -1,13 +1,12 @@
 package com.oc.safetynet.alertsapi.service;
 
-import com.oc.safetynet.alertsapi.model.FireStation;
+import com.oc.safetynet.alertsapi.exception.PersonNotFoundException;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
 import com.oc.safetynet.alertsapi.model.dto.*;
 import com.oc.safetynet.alertsapi.repository.FireStationRepository;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import com.oc.safetynet.alertsapi.repository.PersonRepository;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,23 +34,29 @@ public class PersonService {
     @Autowired MedicalRecordService medicalRecordService;
 
     public List<Person> getAllPersons() {
+        List<Person> persons = personRepository.findAll();
+        logger.debug("List of persons retrieved: {}", persons);
         return personRepository.findAll();
     }
 
     public List<Person> saveAllPersons(List<Person> persons) {
+        logger.debug("List of persons saved: {}", persons);
         return personRepository.saveAll(persons);
     }
 
     public List<String> findPhonesByStation(int station) {
         List<String> addresses = fireStationRepository.findAddressesByStation(station);
+        logger.debug("List of addresses corresponding to FireStation number {}: {}", station, addresses);
+        List<String> phones = personRepository.findPhoneByAddresses(addresses);
+        logger.info("List of phone numbers found for addresses {} covered by station {}: {}", addresses, station,phones);
         return personRepository.findPhoneByAddresses(addresses);
     }
 
     public List<PersonInfoDTO> findPersonInfoListDTO(String firstName, String lastName) {
         List<MedicalRecord> medicalRecords = medicalRecordRepository.findAllByFirstNameAndLastName(firstName, lastName);
-        logger.info("Medical Record(s) found: {}", medicalRecords);
+        logger.debug("Medical Record(s) found: {}", medicalRecords);
         List<Person> persons = personRepository.findPersonByFirstNameAndLastName(firstName, lastName);
-        logger.info("Person(s) found: {}", persons);
+        logger.debug("Person(s) found: {}", persons);
 
         List<PersonInfoDTO> personInfoDTOS = new ArrayList<>();
 
@@ -73,6 +78,7 @@ public class PersonService {
 
             personInfoDTOS.add(personInfoDTO);
         }
+        logger.info("Information found for person(s): {}", personInfoDTOS.toString());
         return personInfoDTOS;
     }
 
@@ -80,6 +86,7 @@ public class PersonService {
 
     public List<HomeDTO> findHomesByStation(int station) {
         List<String> addresses = fireStationRepository.findAddressesByStation(station);
+        logger.debug("List of addresses covered by Fire Station number {}: {}", station, addresses);
         List<HomeDTO> homeDTOS = new ArrayList<>();
 
         for (String address : addresses) {
@@ -104,6 +111,7 @@ public class PersonService {
                 homeDTOS.add(homeDTO);
             }
         }
+        logger.info("List of households covered by Fire Station number {}: {}", station, homeDTOS.toString());
         return homeDTOS;
     }
 
@@ -112,7 +120,7 @@ public class PersonService {
     public PersonFireWithStationNumberDTO findPersonsAtAddress(String address) {
 
         List<Person> persons = personRepository.findByAddress(address);
-        logger.info("Persons: {}", persons);
+        logger.debug("Persons at address {}: {}", address, persons);
         List<PersonFireDTO> personFireDTOS = new ArrayList<>();
 
         for(Person person : persons) {
@@ -134,6 +142,7 @@ public class PersonService {
         personFireWithStationNumberDTO.setPersonFireDTOs(personFireDTOS);
         personFireWithStationNumberDTO.setStation(station);
 
+        logger.info("Persons at address {}: {}", address, personFireWithStationNumberDTO.toString());
         return personFireWithStationNumberDTO;
 }
 
@@ -142,6 +151,7 @@ public class PersonService {
         LocalDate eighteenYearsAgo = now.minusYears(18);
 
         List<Person> personsAtAddress = personRepository.findByAddress(address);
+        logger.debug("Persons found at address {}: {}", address, personsAtAddress);
         List<ChildDTO> childDTOS = new ArrayList<>();
 
 
@@ -166,6 +176,7 @@ public class PersonService {
                 }
             }
         }
+        logger.info("Minors found at address {}: {}", address, childDTOS.toString());
         return childDTOS;
     }
 
@@ -173,7 +184,9 @@ public class PersonService {
     public PersonWithCountDTO findPersonsByStation(int station) {
 
         List<String> addresses = fireStationRepository.findAddressesByStation(station);
+        logger.debug("Addresses covered by station number {}: {}", station, addresses);
         List<Person> persons = personRepository.findByAddresses(addresses);
+        logger.debug("Persons found for addresses {}: {}", addresses, persons);
         List<MedicalRecord> medicalRecords = new ArrayList<>();
         List<PersonDTO> personDTOs = new ArrayList<>();
 
@@ -186,13 +199,17 @@ public class PersonService {
         }
 
         int majorCount = medicalRecordService.countMajorsForMedicalRecords(medicalRecords);
+        logger.debug("{} majors have been found", majorCount);
         int minorCount = medicalRecordService.countMinorsForMedicalRecords(medicalRecords);
+        logger.debug("{} minors have been found", minorCount);
+
 
         PersonWithCountDTO personWithCountDTO = new PersonWithCountDTO();
         personWithCountDTO.setPersonDTOs(personDTOs);
         personWithCountDTO.setMinorCount(minorCount);
         personWithCountDTO.setMajorCount(majorCount);
 
+        logger.info("Persons covered by station number {}: {}", station, personWithCountDTO.toString());
         return personWithCountDTO;
     }
 
@@ -213,14 +230,14 @@ public class PersonService {
     }
 
     public Person addPerson (Person person){
-        // appel repo si la personne existe deja en fonction firstName and lastName si la personne est null on continue sinon on bloque
-        // clé primaire composite
 
         Person personToAdd = personRepository.getByFirstNameAndLastName(person.getFirstName(), person.getLastName());
         if(person.getId()!= 0) {
+            logger.error("ID is automatically incremented");
             throw new IllegalArgumentException("ID is automatically incremented");
         }
         if (personToAdd != null) {
+            logger.error("Person with the same first name and last name already exists");
             throw new IllegalArgumentException("Person with the same first name and last name already exists");
         } else {
             person.setFirstName(person.getFirstName());
@@ -240,23 +257,41 @@ public class PersonService {
     @Transactional
     public void deletePerson(Person person) {
 
+        if(person == null) {
+            logger.error("Invalid input: Person is null");
+            throw new IllegalArgumentException("Invalid input: medicalRecord is null");
+        }
+
         Person personToDelete = personRepository.getByFirstNameAndLastName(person.getFirstName(), person.getLastName());
 
-        if(personToDelete != null) {
+        if(personToDelete == null) {
+            logger.error("No person found for: {} {}", person.getFirstName(), person.getLastName());
+            throw new PersonNotFoundException(
+                    String.format("No person was found for: %s %s",
+                            person.getFirstName(), person.getLastName()));
+        }
             String firstName = person.getFirstName();
             String lastName = person.getLastName();
             logger.info("Person deleted: {} {}", firstName, lastName);
             personRepository.deleteByFirstNameAndLastName(person.getFirstName(), person.getLastName());
-        } else {
-            logger.warn("Person wasn't found");
-        }
-
     }
 
     public Person updatePerson (Person person) {
 
-        if (person != null) {
+        if (person == null) {
+            logger.error("Invalid input: Person is null");
+            throw new IllegalArgumentException("Invalid input: medicalRecord is null");
+        }
+
             Person personToUpdate = personRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+
+        if(personToUpdate == null) {
+            logger.error("No person found for: {} {}", person.getFirstName(), person.getLastName());
+            throw new PersonNotFoundException(
+                    String.format("No person was found for: %s %s",
+                            person.getFirstName(), person.getLastName()));
+        }
+
             logger.info("Person before update: {}", personToUpdate);
 
             personToUpdate.setAddress(person.getAddress());
@@ -267,15 +302,9 @@ public class PersonService {
 
             logger.info("Person after updating: {}", personToUpdate);
             return personRepository.save(personToUpdate);
-
-        } else {
-            logger.warn("Person wasn't found");
-            return null;
-        }
     }
 
     public Person getPersonByFirstNameAndLastName(String firstName, String lastName) {
         return personRepository.getByFirstNameAndLastName(firstName, lastName);
-
     }
 }
