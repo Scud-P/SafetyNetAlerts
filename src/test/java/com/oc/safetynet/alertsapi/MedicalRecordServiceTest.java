@@ -1,6 +1,7 @@
 package com.oc.safetynet.alertsapi;
 
 
+import com.oc.safetynet.alertsapi.exception.MedicalRecordNotFoundException;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
 import com.oc.safetynet.alertsapi.service.MedicalRecordService;
@@ -146,6 +147,23 @@ public class MedicalRecordServiceTest {
     }
 
     @Test
+    public void testDeleteMedicalRecordNotFound() {
+        MedicalRecord medicalRecordToDelete = new MedicalRecord();
+        medicalRecordToDelete.setFirstName("Bob");
+        medicalRecordToDelete.setLastName("Bober");
+        medicalRecordToDelete.setBirthdate(bobBirthDate);
+        medicalRecordToDelete.setAllergies(allergiesBob);
+        medicalRecordToDelete.setMedications(medicationsBob);
+
+        when(medicalRecordRepository.findByFirstNameAndLastName(anyString(), anyString())).thenReturn(null);
+
+        assertThrows(MedicalRecordNotFoundException.class, () ->
+                medicalRecordService.deleteMedicalRecord(medicalRecordToDelete));
+
+        verify(medicalRecordRepository, times(0)).deleteByFirstNameAndLastName("Bob", "Bober");
+    }
+
+    @Test
     public void testUpdateMedicalRecordFound() {
         MedicalRecord medicalRecordToUpdate = new MedicalRecord();
         medicalRecordToUpdate.setFirstName("Bob");
@@ -181,7 +199,7 @@ public class MedicalRecordServiceTest {
         medicalRecordToUpdate.setAllergies(allergiesBob2);
         medicalRecordToUpdate.setMedications(medicationsBob2);
 
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(MedicalRecordNotFoundException.class, () -> {
             medicalRecordService.updateMedicalRecord(medicalRecordToUpdate);
         });
 

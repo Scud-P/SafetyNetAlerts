@@ -1,5 +1,6 @@
 package com.oc.safetynet.alertsapi;
 
+import com.oc.safetynet.alertsapi.exception.FireStationNotFoundException;
 import com.oc.safetynet.alertsapi.model.FireStation;
 import com.oc.safetynet.alertsapi.repository.FireStationRepository;
 import com.oc.safetynet.alertsapi.service.FireStationService;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -59,13 +61,13 @@ public class FireStationServiceTest {
         fireStationToUpdate.setStation(1);
         fireStationToUpdate.setAddress("test address");
 
-        when(fireStationRepository.findByAddress(anyString())).thenReturn(null);
+        when(fireStationRepository.findByAddress("test address")).thenReturn(null);
         fireStationToUpdate.setStation(3);
 
-        fireStationService.updateFireStation(fireStationToUpdate);
+        assertThrows(FireStationNotFoundException.class, () ->
+                fireStationService.updateFireStation(fireStationToUpdate));
 
-        verify(fireStationRepository,times(1)).findByAddress("test address");
-        verify(fireStationRepository, times(0)).save(fireStationToUpdate);
+        verify(fireStationRepository, times(1)).findByAddress("test address");
     }
 
     @Test
@@ -80,6 +82,22 @@ public class FireStationServiceTest {
         fireStationService.deleteFireStation(fireStationToDelete);
 
         verify(fireStationRepository, times(1)).deleteByAddressAndStation("test address", 1);
+    }
+
+    @Test
+    public void testDeleteFireStationNotFound() {
+
+        FireStation fireStationToDelete = new FireStation();
+        fireStationToDelete.setStation(1);
+        fireStationToDelete.setAddress("test address");
+
+        when(fireStationRepository.findByAddress("test address")).thenReturn(null);
+
+        assertThrows(FireStationNotFoundException.class, () ->
+                        fireStationService.deleteFireStation(fireStationToDelete));
+
+        verify(fireStationRepository, times(0)).deleteByAddressAndStation("test address", 1);
+
     }
 
     @Test

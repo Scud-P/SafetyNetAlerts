@@ -3,6 +3,7 @@ package com.oc.safetynet.alertsapi;
 import com.oc.safetynet.alertsapi.controller.FireStationController;
 import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
 import com.oc.safetynet.alertsapi.controller.PersonController;
+import com.oc.safetynet.alertsapi.exception.PersonNotFoundException;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
 import com.oc.safetynet.alertsapi.model.dto.*;
@@ -144,7 +145,7 @@ public class PersonServiceTest {
         assertThat(results).hasSize(4);
 
         verify(fireStationRepository, times(1)).findAddressesByStation(station);
-        verify(personRepository, times(1)).findPhoneByAddresses(addresses);
+        verify(personRepository, times(2)).findPhoneByAddresses(addresses);
 
     }
 
@@ -181,7 +182,7 @@ public class PersonServiceTest {
         assertNotNull(result);
         assertThat(result).hasSize(2);
 
-        verify(personRepository, times(1)).findAll();
+        verify(personRepository, times(2)).findAll();
 
     }
 
@@ -291,7 +292,7 @@ public class PersonServiceTest {
         personToUpdate.setPhone("updated phone");
         personToUpdate.setEmail("updated email");
 
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(PersonNotFoundException.class, () -> {
             personService.updatePerson(personToUpdate);
         });
 
