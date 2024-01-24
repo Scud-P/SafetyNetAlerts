@@ -17,7 +17,6 @@ public class FireStationService {
 
     private static final Logger logger = LoggerFactory.getLogger(FireStationService.class);
 
-    @Autowired
     private FireStationRepository fireStationRepository;
 
     public List<FireStation> getAllFireStations() {
@@ -48,8 +47,6 @@ public class FireStationService {
     }
 
     public FireStation addFireStation(FireStation fireStation) {
-        if (fireStation.getId() != 0) {
-            throw new IllegalArgumentException("ID is automatically incremented");}
         fireStation.setStation(fireStation.getStation());
         fireStation.setAddress(fireStation.getAddress());
         logger.info("Fire Station added: {}", fireStation);

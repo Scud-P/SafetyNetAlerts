@@ -14,18 +14,13 @@ import java.util.List;
 @ToString
 @Data
 public class MedicalRecord {
-
-    @Id
-    @GeneratedValue
-    private long id;
     private String firstName;
     private String lastName;
-    private LocalDate birthdate;
+    private String birthdate;
     private List<String> medications;
     private List<String> allergies;
 
-    public MedicalRecord(long id, String firstName, String lastName, LocalDate birthdate, List<String> medications, List<String> allergies) {
-        this.id = id;
+    public MedicalRecord(String firstName, String lastName, String birthdate, List<String> medications, List<String> allergies) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthdate = birthdate;
@@ -52,17 +47,12 @@ public class MedicalRecord {
         this.lastName = lastName;
     }
 
-    public LocalDate getBirthdate() {
+    public String getBirthdate() {
         return birthdate;
     }
 
-    public void setBirthdate(LocalDate birthdate) {
-        this.birthdate = birthdate;
-    }
-
     public void setBirthdate(String birthdate) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        this.birthdate = LocalDate.parse(birthdate, dateTimeFormatter);
+        this.birthdate = birthdate;
     }
 
     public List<String> getMedications() {
@@ -79,13 +69,6 @@ public class MedicalRecord {
 
     public void setAllergies(List<String> allergies) {
         this.allergies = allergies;
-    }
-
-    public long getId() {
-        return id;
-    }
-    public void setId(long id) {
-        this.id = id;
     }
 
 }

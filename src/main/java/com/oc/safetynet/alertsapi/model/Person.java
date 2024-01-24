@@ -1,9 +1,6 @@
 package com.oc.safetynet.alertsapi.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.ToString;
 
@@ -12,11 +9,6 @@ import lombok.ToString;
 @ToString
 
 public class Person {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
 
     private String firstName;
     private String lastName;
@@ -29,8 +21,7 @@ public class Person {
     public Person() {
     }
 
-    public Person(long id, String firstName, String lastName, String address, String city, String zip, String phone, String email) {
-        this.id = id;
+    public Person(String firstName, String lastName, String address, String city, String zip, String phone, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
@@ -94,10 +85,6 @@ public class Person {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public long getId() {
-        return id;
     }
 
 }

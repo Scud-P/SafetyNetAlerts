@@ -1,12 +1,11 @@
 package com.oc.safetynet.alertsapi.service;
 
 import com.oc.safetynet.alertsapi.exception.PersonNotFoundException;
+import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
 import com.oc.safetynet.alertsapi.model.dto.*;
-import com.oc.safetynet.alertsapi.repository.FireStationRepository;
-import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
-import com.oc.safetynet.alertsapi.repository.PersonRepository;
+import com.oc.safetynet.alertsapi.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,23 +21,25 @@ public class PersonService {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
 
-    @Autowired
+    private static Data data;
+
     private PersonRepository personRepository;
 
-    @Autowired
     private FireStationRepository fireStationRepository;
 
-    @Autowired
     private MedicalRecordRepository medicalRecordRepository;
 
-    @Autowired MedicalRecordService medicalRecordService;
+    private MedicalRecordService medicalRecordService;
+
+    @Autowired
+    private PersonRepoImpl personRepoImpl;
+
+    @Autowired
+    private MedicalRecordRepoImpl medicalRecordRepoImpl;
 
     public List<Person> getAllPersons() {
-        List<Person> persons = personRepository.findAll();
-        logger.debug("List of persons retrieved: {}", persons);
-        return personRepository.findAll();
+        return data.getPersons();
     }
-
     public List<Person> saveAllPersons(List<Person> persons) {
         logger.debug("List of persons saved: {}", persons);
         return personRepository.saveAll(persons);
@@ -52,133 +53,147 @@ public class PersonService {
         return personRepository.findPhoneByAddresses(addresses);
     }
 
+//    public List<PersonInfoDTO> findPersonInfoListDTO(String firstName, String lastName) {
+//        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAllByFirstNameAndLastName(firstName, lastName);
+//        logger.debug("Medical Record(s) found: {}", medicalRecords);
+//        List<Person> persons = personRepository.findPersonByFirstNameAndLastName(firstName, lastName);
+//        logger.debug("Person(s) found: {}", persons);
+//
+//        List<PersonInfoDTO> personInfoDTOS = new ArrayList<>();
+//
+//        for(int i = 0; i < medicalRecords.size() && i < persons.size(); i++) {
+//            MedicalRecord medicalRecord = medicalRecords.get(i);
+//            Person person = persons.get(i);
+//
+//            PersonInfoDTO personInfoDTO = new PersonInfoDTO();
+//
+//            personInfoDTO.setFirstName(person.getFirstName());
+//            personInfoDTO.setLastName(person.getLastName());
+//            personInfoDTO.setAddress(person.getAddress());
+//            personInfoDTO.setEmail(person.getEmail());
+//
+//            int age = calculateAge(medicalRecord.getBirthdate());
+//            personInfoDTO.setAge(age);
+//            personInfoDTO.setMedications(medicalRecord.getMedications());
+//            personInfoDTO.setAllergies(medicalRecord.getAllergies());
+//
+//            personInfoDTOS.add(personInfoDTO);
+//        }
+//        logger.info("Information found for person(s): {}", personInfoDTOS.toString());
+//        return personInfoDTOS;
+//    }
+
     public List<PersonInfoDTO> findPersonInfoListDTO(String firstName, String lastName) {
-        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAllByFirstNameAndLastName(firstName, lastName);
-        logger.debug("Medical Record(s) found: {}", medicalRecords);
-        List<Person> persons = personRepository.findPersonByFirstNameAndLastName(firstName, lastName);
-        logger.debug("Person(s) found: {}", persons);
 
-        List<PersonInfoDTO> personInfoDTOS = new ArrayList<>();
+        List<Person> persons = personRepoImpl.findAllByFirstNameAndLastName(firstName, lastName);
+        List<MedicalRecord> medicalRecords = medicalRecordRepoImpl.findAllByFirstNameAndLastName(firstName, lastName);
 
-        for(int i = 0; i < medicalRecords.size() && i < persons.size(); i++) {
-            MedicalRecord medicalRecord = medicalRecords.get(i);
-            Person person = persons.get(i);
-
-            PersonInfoDTO personInfoDTO = new PersonInfoDTO();
-
-            personInfoDTO.setFirstName(person.getFirstName());
-            personInfoDTO.setLastName(person.getLastName());
-            personInfoDTO.setAddress(person.getAddress());
-            personInfoDTO.setEmail(person.getEmail());
-
-            int age = calculateAge(medicalRecord.getBirthdate());
-            personInfoDTO.setAge(age);
-            personInfoDTO.setMedications(medicalRecord.getMedications());
-            personInfoDTO.setAllergies(medicalRecord.getAllergies());
-
-            personInfoDTOS.add(personInfoDTO);
-        }
-        logger.info("Information found for person(s): {}", personInfoDTOS.toString());
+        List<PersonInfoDTO> personInfoDTOS = persons.stream()
+                .flatMap(person -> medicalRecords.stream()
+                        .filter(medicalRecord ->
+                                person.getFirstName().equals(medicalRecord.getFirstName()) &&
+                                        person.getLastName().equals(medicalRecord.getLastName()))
+                                        .map(medicalRecord -> new PersonInfoDTO(person, medicalRecord)))
+                        .toList();
         return personInfoDTOS;
     }
 
 
-
-    public List<HomeDTO> findHomesByStation(int station) {
-        List<String> addresses = fireStationRepository.findAddressesByStation(station);
-        logger.debug("List of addresses covered by Fire Station number {}: {}", station, addresses);
-        List<HomeDTO> homeDTOS = new ArrayList<>();
-
-        for (String address : addresses) {
-            List<Person> persons = personRepository.findByAddress(address);
-            List<FamilyMemberDTO> familyMemberDTOS = new ArrayList<>();
-
-            for (Person person : persons) {
-                MedicalRecord medicalRecord = medicalRecordRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
-                FamilyMemberDTO familyMemberDTO = new FamilyMemberDTO();
-                familyMemberDTO.setFirstName(person.getFirstName());
-                familyMemberDTO.setLastName(person.getLastName());
-                familyMemberDTO.setPhone(person.getPhone());
-                int age = calculateAge(medicalRecord.getBirthdate());
-                familyMemberDTO.setAge(age);
-                familyMemberDTO.setAllergies(medicalRecord.getAllergies());
-                familyMemberDTO.setMedications(medicalRecord.getMedications());
-                familyMemberDTOS.add(familyMemberDTO);
-
-                HomeDTO homeDTO = new HomeDTO();
-                homeDTO.setAddress(address);
-                homeDTO.setFamilyMembers(familyMemberDTOS);
-                homeDTOS.add(homeDTO);
-            }
-        }
-        logger.info("List of households covered by Fire Station number {}: {}", station, homeDTOS.toString());
-        return homeDTOS;
-    }
-
+//    public List<HomeDTO> findHomesByStation(int station) {
+//        List<String> addresses = fireStationRepository.findAddressesByStation(station);
+//        logger.debug("List of addresses covered by Fire Station number {}: {}", station, addresses);
+//        List<HomeDTO> homeDTOS = new ArrayList<>();
+//
+//        for (String address : addresses) {
+//            List<Person> persons = personRepository.findByAddress(address);
+//            List<FamilyMemberDTO> familyMemberDTOS = new ArrayList<>();
+//
+//            for (Person person : persons) {
+//                MedicalRecord medicalRecord = medicalRecordRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+//                FamilyMemberDTO familyMemberDTO = new FamilyMemberDTO();
+//                familyMemberDTO.setFirstName(person.getFirstName());
+//                familyMemberDTO.setLastName(person.getLastName());
+//                familyMemberDTO.setPhone(person.getPhone());
+//                int age = calculateAge(medicalRecord.getBirthdate());
+//                familyMemberDTO.setAge(age);
+//                familyMemberDTO.setAllergies(medicalRecord.getAllergies());
+//                familyMemberDTO.setMedications(medicalRecord.getMedications());
+//                familyMemberDTOS.add(familyMemberDTO);
+//
+//                HomeDTO homeDTO = new HomeDTO();
+//                homeDTO.setAddress(address);
+//                homeDTO.setFamilyMembers(familyMemberDTOS);
+//                homeDTOS.add(homeDTO);
+//            }
+//        }
+//        logger.info("List of households covered by Fire Station number {}: {}", station, homeDTOS.toString());
+//        return homeDTOS;
+//    }
 
 
-    public PersonFireWithStationNumberDTO findPersonsAtAddress(String address) {
 
-        List<Person> persons = personRepository.findByAddress(address);
-        logger.debug("Persons at address {}: {}", address, persons);
-        List<PersonFireDTO> personFireDTOS = new ArrayList<>();
+//    public PersonFireWithStationNumberDTO findPersonsAtAddress(String address) {
+//
+//        List<Person> persons = personRepository.findByAddress(address);
+//        logger.debug("Persons at address {}: {}", address, persons);
+//        List<PersonFireDTO> personFireDTOS = new ArrayList<>();
+//
+//        for(Person person : persons) {
+//            MedicalRecord medicalRecord = medicalRecordRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+//            PersonFireDTO personFireDTO = new PersonFireDTO();
+//            personFireDTO.setFirstName(person.getFirstName());
+//            personFireDTO.setLastName(person.getLastName());
+//            personFireDTO.setPhone(person.getPhone());
+//            personFireDTO.setAllergies(medicalRecord.getAllergies());
+//            personFireDTO.setMedications(medicalRecord.getMedications());
+//            int age = calculateAge(medicalRecord.getBirthdate());
+//            personFireDTO.setAge(age);
+//            personFireDTOS.add(personFireDTO);
+//
+//        }
+//        PersonFireWithStationNumberDTO personFireWithStationNumberDTO = new PersonFireWithStationNumberDTO();
+//
+//        int station = fireStationRepository.findStationNumberByAddress(address);
+//        personFireWithStationNumberDTO.setPersonFireDTOs(personFireDTOS);
+//        personFireWithStationNumberDTO.setStation(station);
+//
+//        logger.info("Persons at address {}: {}", address, personFireWithStationNumberDTO.toString());
+//        return personFireWithStationNumberDTO;
+//}
 
-        for(Person person : persons) {
-            MedicalRecord medicalRecord = medicalRecordRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
-            PersonFireDTO personFireDTO = new PersonFireDTO();
-            personFireDTO.setFirstName(person.getFirstName());
-            personFireDTO.setLastName(person.getLastName());
-            personFireDTO.setPhone(person.getPhone());
-            personFireDTO.setAllergies(medicalRecord.getAllergies());
-            personFireDTO.setMedications(medicalRecord.getMedications());
-            int age = calculateAge(medicalRecord.getBirthdate());
-            personFireDTO.setAge(age);
-            personFireDTOS.add(personFireDTO);
-
-        }
-        PersonFireWithStationNumberDTO personFireWithStationNumberDTO = new PersonFireWithStationNumberDTO();
-
-        int station = fireStationRepository.findStationNumberByAddress(address);
-        personFireWithStationNumberDTO.setPersonFireDTOs(personFireDTOS);
-        personFireWithStationNumberDTO.setStation(station);
-
-        logger.info("Persons at address {}: {}", address, personFireWithStationNumberDTO.toString());
-        return personFireWithStationNumberDTO;
-}
-
-    public List<ChildDTO> findMinorsAtAddress(String address) {
-        LocalDate now = LocalDate.now();
-        LocalDate eighteenYearsAgo = now.minusYears(18);
-
-        List<Person> personsAtAddress = personRepository.findByAddress(address);
-        logger.debug("Persons found at address {}: {}", address, personsAtAddress);
-        List<ChildDTO> childDTOS = new ArrayList<>();
-
-
-        for (Person personAtAddress : personsAtAddress) {
-            List<MedicalRecord> medicalRecords = medicalRecordRepository.findByFirstNameAndLastNameAndBirthDateAfter(
-                    personAtAddress.getFirstName(),
-                    personAtAddress.getLastName(),
-                    eighteenYearsAgo);
-
-            for (MedicalRecord medicalRecord : medicalRecords) {
-                if (isSamePerson(medicalRecord, personAtAddress)) {
-                    int age = calculateAge(medicalRecord.getBirthdate());
-                    ChildDTO childDTO = new ChildDTO();
-                    childDTO.setFirstName(personAtAddress.getFirstName());
-                    childDTO.setLastName(personAtAddress.getLastName());
-                    childDTO.setAge(age);
-
-                    List<Person> familyMembers = new ArrayList<>(personsAtAddress);
-                    familyMembers.removeIf(p -> isSamePerson(medicalRecord, p));
-                    childDTO.setFamilyMembers(familyMembers);
-                    childDTOS.add(childDTO);
-                }
-            }
-        }
-        logger.info("Minors found at address {}: {}", address, childDTOS.toString());
-        return childDTOS;
-    }
+//    public List<ChildDTO> findMinorsAtAddress(String address) {
+//        LocalDate now = LocalDate.now();
+//        LocalDate eighteenYearsAgo = now.minusYears(18);
+//
+//        List<Person> personsAtAddress = personRepository.findByAddress(address);
+//        logger.debug("Persons found at address {}: {}", address, personsAtAddress);
+//        List<ChildDTO> childDTOS = new ArrayList<>();
+//
+//
+//        for (Person personAtAddress : personsAtAddress) {
+//            List<MedicalRecord> medicalRecords = medicalRecordRepository.findByFirstNameAndLastNameAndBirthDateAfter(
+//                    personAtAddress.getFirstName(),
+//                    personAtAddress.getLastName(),
+//                    eighteenYearsAgo);
+//
+//            for (MedicalRecord medicalRecord : medicalRecords) {
+//                if (isSamePerson(medicalRecord, personAtAddress)) {
+//                    int age = calculateAge(medicalRecord.getBirthdate());
+//                    ChildDTO childDTO = new ChildDTO();
+//                    childDTO.setFirstName(personAtAddress.getFirstName());
+//                    childDTO.setLastName(personAtAddress.getLastName());
+//                    childDTO.setAge(age);
+//
+//                    List<Person> familyMembers = new ArrayList<>(personsAtAddress);
+//                    familyMembers.removeIf(p -> isSamePerson(medicalRecord, p));
+//                    childDTO.setFamilyMembers(familyMembers);
+//                    childDTOS.add(childDTO);
+//                }
+//            }
+//        }
+//        logger.info("Minors found at address {}: {}", address, childDTOS.toString());
+//        return childDTOS;
+//    }
 
 
     public PersonWithCountDTO findPersonsByStation(int station) {
@@ -229,29 +244,10 @@ public class PersonService {
         return emails;
     }
 
-    public Person addPerson (Person person){
-
-        Person personToAdd = personRepository.getByFirstNameAndLastName(person.getFirstName(), person.getLastName());
-        if(person.getId()!= 0) {
-            logger.error("ID is automatically incremented");
-            throw new IllegalArgumentException("ID is automatically incremented");
-        }
-        if (personToAdd != null) {
-            logger.error("Person with the same first name and last name already exists");
-            throw new IllegalArgumentException("Person with the same first name and last name already exists");
-        } else {
-            person.setFirstName(person.getFirstName());
-            person.setLastName(person.getLastName());
-            person.setAddress(person.getAddress());
-            person.setCity(person.getCity());
-            person.setZip(person.getZip());
-            person.setPhone(person.getPhone());
-            person.setEmail(person.getEmail());
-
-            logger.info("Person added: {}", person);
-
-            return personRepository.save(person);
-        }
+    public List<Person> addPerson (Person person){
+        List<Person> persons = data.getPersons();
+        persons.add(person);
+        return persons;
     }
 
     @Transactional

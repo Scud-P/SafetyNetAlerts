@@ -3,7 +3,6 @@ package com.oc.safetynet.alertsapi.service;
 import com.oc.safetynet.alertsapi.exception.MedicalRecordNotFoundException;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,6 @@ import java.util.List;
 public class MedicalRecordService {
     private static final Logger logger = LoggerFactory.getLogger(MedicalRecordService.class);
 
-    @Autowired
     private MedicalRecordRepository medicalRecordRepository;
 
     public List<MedicalRecord> getAllMedicalRecords() {

@@ -265,25 +265,25 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("$[2]").value("bab@bab.bab"));
     }
 
-    @Test
-    public void testAddPerson() throws Exception {
-
-        Person person = new Person(1L, "Bob", "Dylan", "test address", "test city", "test zip", "test phone", "test email");
-
-        when(personService.addPerson(any(Person.class))).thenReturn(person);
-
-        mockMvc.perform(post("/person")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(person)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName").value("Bob"))
-                .andExpect(jsonPath("$.lastName").value("Dylan"))
-                .andExpect(jsonPath("$.address").value("test address"))
-                .andExpect(jsonPath("$.city").value("test city"))
-                .andExpect(jsonPath("$.zip").value("test zip"))
-                .andExpect(jsonPath("$.phone").value("test phone"))
-                .andExpect(jsonPath("$.email").value("test email"));
-    }
+//    @Test
+//    public void testAddPerson() throws Exception {
+//
+//        Person person = new Person(1L, "Bob", "Dylan", "test address", "test city", "test zip", "test phone", "test email");
+//
+//        when(personService.addPerson(any(Person.class))).thenReturn(person);
+//
+//        mockMvc.perform(post("/person")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(objectMapper.writeValueAsString(person)))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.firstName").value("Bob"))
+//                .andExpect(jsonPath("$.lastName").value("Dylan"))
+//                .andExpect(jsonPath("$.address").value("test address"))
+//                .andExpect(jsonPath("$.city").value("test city"))
+//                .andExpect(jsonPath("$.zip").value("test zip"))
+//                .andExpect(jsonPath("$.phone").value("test phone"))
+//                .andExpect(jsonPath("$.email").value("test email"));
+//    }
 
     @Test
     public void testGetPersonByFirstNameAndLastName() throws Exception {

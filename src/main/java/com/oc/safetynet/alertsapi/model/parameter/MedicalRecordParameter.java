@@ -28,7 +28,7 @@ public class MedicalRecordParameter {
         MedicalRecord medicalRecord = new MedicalRecord();
         medicalRecord.setFirstName(this.firstName);
         medicalRecord.setLastName(this.lastName);
-        medicalRecord.setBirthdate(LocalDate.parse(this.birthdate));
+        medicalRecord.setBirthdate(this.birthdate);
         medicalRecord.setAllergies(this.allergies);
         medicalRecord.setMedications(this.medications);
         return medicalRecord;
