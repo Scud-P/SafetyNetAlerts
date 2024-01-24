@@ -11,9 +11,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -36,6 +39,9 @@ public class PersonService {
 
     @Autowired
     private MedicalRecordRepoImpl medicalRecordRepoImpl;
+
+    @Autowired
+    private FireStationRepoImpl fireStationRepoImpl;
 
     public List<Person> getAllPersons() {
         return data.getPersons();
@@ -88,47 +94,33 @@ public class PersonService {
         List<Person> persons = personRepoImpl.findAllByFirstNameAndLastName(firstName, lastName);
         List<MedicalRecord> medicalRecords = medicalRecordRepoImpl.findAllByFirstNameAndLastName(firstName, lastName);
 
-        List<PersonInfoDTO> personInfoDTOS = persons.stream()
+        return persons.stream()
                 .flatMap(person -> medicalRecords.stream()
                         .filter(medicalRecord ->
                                 person.getFirstName().equals(medicalRecord.getFirstName()) &&
                                         person.getLastName().equals(medicalRecord.getLastName()))
                                         .map(medicalRecord -> new PersonInfoDTO(person, medicalRecord)))
                         .toList();
-        return personInfoDTOS;
     }
 
 
-//    public List<HomeDTO> findHomesByStation(int station) {
-//        List<String> addresses = fireStationRepository.findAddressesByStation(station);
-//        logger.debug("List of addresses covered by Fire Station number {}: {}", station, addresses);
-//        List<HomeDTO> homeDTOS = new ArrayList<>();
-//
-//        for (String address : addresses) {
-//            List<Person> persons = personRepository.findByAddress(address);
-//            List<FamilyMemberDTO> familyMemberDTOS = new ArrayList<>();
-//
-//            for (Person person : persons) {
-//                MedicalRecord medicalRecord = medicalRecordRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
-//                FamilyMemberDTO familyMemberDTO = new FamilyMemberDTO();
-//                familyMemberDTO.setFirstName(person.getFirstName());
-//                familyMemberDTO.setLastName(person.getLastName());
-//                familyMemberDTO.setPhone(person.getPhone());
-//                int age = calculateAge(medicalRecord.getBirthdate());
-//                familyMemberDTO.setAge(age);
-//                familyMemberDTO.setAllergies(medicalRecord.getAllergies());
-//                familyMemberDTO.setMedications(medicalRecord.getMedications());
-//                familyMemberDTOS.add(familyMemberDTO);
-//
-//                HomeDTO homeDTO = new HomeDTO();
-//                homeDTO.setAddress(address);
-//                homeDTO.setFamilyMembers(familyMemberDTOS);
-//                homeDTOS.add(homeDTO);
-//            }
-//        }
-//        logger.info("List of households covered by Fire Station number {}: {}", station, homeDTOS.toString());
-//        return homeDTOS;
-//    }
+    public List<HomeDTO> findHomesByAddresses(int station) {
+        List<String> addresses = fireStationRepoImpl.findAddressesByStation(station);
+        return addresses.stream()
+                .map(address -> {
+                    List<Person> persons = personRepoImpl.findPersonsByAddresses(Collections.singletonList(address));
+                    List<FamilyMemberDTO> familyMemberDTOS = persons.stream()
+                            .map(person -> {
+                                MedicalRecord medicalRecord = medicalRecordRepoImpl.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+                                return new FamilyMemberDTO(person, medicalRecord);
+                            })
+                            .toList();
+                    return new HomeDTO(address, familyMemberDTOS);
+                })
+                .toList();
+    }
+
+
 
 
 

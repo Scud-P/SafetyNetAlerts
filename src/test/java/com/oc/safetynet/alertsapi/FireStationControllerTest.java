@@ -54,9 +54,9 @@ public class FireStationControllerTest {
     public void testGetAllFireStations() throws Exception {
 
         List<FireStation> fireStations = List.of(
-                new FireStation(1L, "test address 1", 1),
-                new FireStation(2L, "test address 2", 2),
-                new FireStation(3L, "test address 3", 3)
+                new FireStation("test address 1", 1),
+                new FireStation("test address 2", 2),
+                new FireStation("test address 3", 3)
         );
 
         when(fireStationService.getAllFireStations()).thenReturn(fireStations);
@@ -73,7 +73,7 @@ public class FireStationControllerTest {
     @Test
     public void testAddFireStation() throws Exception {
 
-        FireStation station = new FireStation(1L, "test address", 1);
+        FireStation station = new FireStation("test address", 1);
 
         when(fireStationService.addFireStation(any(FireStation.class))).thenReturn(station);
 
@@ -88,7 +88,7 @@ public class FireStationControllerTest {
     @Test
     public void testUpdateFireStation() throws Exception {
 
-        FireStation station = new FireStation(1L, "test address", 1);
+        FireStation station = new FireStation("test address", 1);
 
         when(fireStationService.updateFireStation(any(FireStation.class))).thenReturn(station);
 

@@ -16,4 +16,6 @@ public interface PersonRepo {
 
     List<Person> findAllByFirstNameAndLastName(String firstName, String lastName);
 
+    List<Person> findPersonsByAddresses(List<String> addresses);
+
 }

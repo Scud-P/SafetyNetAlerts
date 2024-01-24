@@ -131,4 +131,18 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
     }
+
+    @Override
+    public MedicalRecord findByFirstNameAndLastName(String firstName, String lastName) {
+        try {
+            Data data = dataRepository.readData();
+            return data.getMedicalrecords().stream()
+                    .filter(medicalRecord -> medicalRecord.getFirstName().equalsIgnoreCase(firstName) && medicalRecord.getLastName().equalsIgnoreCase(lastName))
+                    .findFirst()
+                    .orElse(null);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read data from the repository", e);
+        }
+    }
 }

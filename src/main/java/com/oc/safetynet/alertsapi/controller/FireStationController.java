@@ -14,14 +14,11 @@ import java.util.List;
 public class FireStationController {
 
     @Autowired
-    FireStationService fireStationService;
-
-    @Autowired
     FireStationRepoImpl fireStationRepoImpl;
 
     @GetMapping("/firestations")
     public List<FireStation> getAllFireStations() {
-        return fireStationService.getAllFireStations();
+        return fireStationRepoImpl.getAllFireStations();
     }
 
     @PostMapping("/firestation")
@@ -44,10 +41,4 @@ public class FireStationController {
             throw new IllegalArgumentException("Either station number or address must be provided to delete a mapping");
         }
     }
-
-    @PostMapping("/batch")
-    public List<FireStation> addAllFireStations(@RequestBody List<FireStation> fireStations) {
-        return fireStationService.saveAllFireStations(fireStations);
-    }
-
 }

@@ -1,12 +1,9 @@
 package com.oc.safetynet.alertsapi.controller;
 
-import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
 import com.oc.safetynet.alertsapi.model.dto.*;
 import com.oc.safetynet.alertsapi.repository.PersonRepoImpl;
-import com.oc.safetynet.alertsapi.service.FireStationService;
 import com.oc.safetynet.alertsapi.service.PersonService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,10 +49,10 @@ public class PersonController {
     }
 
 
-//    @GetMapping(value = "/flood/stations", params = "stationNumber")
-//    public List<HomeDTO> getAddressesByStation(@RequestParam(name = "stationNumber") int station) {
-//        return personService.findHomesByStation(station);
-//    }
+    @GetMapping(value = "/flood/stations", params = "stationNumber")
+    public List<HomeDTO> getAddressesByStation(@RequestParam(name = "stationNumber") int station) {
+        return personService.findHomesByAddresses(station);
+    }
 
     @GetMapping(value = "/firestation", params = "stationNumber")
     public PersonWithCountDTO getPersonsByStation(@RequestParam(name = "stationNumber") int station) {

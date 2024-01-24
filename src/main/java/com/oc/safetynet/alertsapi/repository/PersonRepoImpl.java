@@ -140,4 +140,19 @@ public class PersonRepoImpl implements PersonRepo {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
     }
+
+    @Override
+    public List<Person> findPersonsByAddresses(List<String> addresses) {
+
+        try {
+            Data data = dataRepository.readData();
+            return data.getPersons().stream()
+                    .filter(person -> addresses.contains(person.getAddress()))
+                    .toList();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read data from the repository", e);
+        }
+    }
+
 }

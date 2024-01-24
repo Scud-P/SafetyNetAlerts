@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class FireStationRepoImpl implements FireStationRepo {
@@ -126,6 +127,20 @@ public class FireStationRepoImpl implements FireStationRepo {
 
             dataRepository.writeData(data);
 
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read data from the repository", e);
+        }
+    }
+
+    @Override
+    public List<String> findAddressesByStation(int station) {
+        try {
+            Data data = dataRepository.readData();
+
+            return data.getFirestations().stream()
+                    .filter(fireStation -> fireStation.getStation() == station)
+                    .map(FireStation::getAddress).toList();
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);
