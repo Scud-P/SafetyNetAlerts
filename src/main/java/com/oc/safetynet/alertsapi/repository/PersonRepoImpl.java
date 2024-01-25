@@ -1,7 +1,6 @@
 package com.oc.safetynet.alertsapi.repository;
 
 import com.oc.safetynet.alertsapi.model.Data;
-import com.oc.safetynet.alertsapi.model.FireStation;
 import com.oc.safetynet.alertsapi.model.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,7 @@ public class PersonRepoImpl implements PersonRepo {
     public Person addPersonToList(Person person) {
         try {
             Data data = dataRepository.readData();
-            List<Person> persons = data.getPersons();
+            List<Person> persons = getAllPersons();
 
             if(persons == null) {
                 persons = new ArrayList<>();
@@ -69,7 +68,7 @@ public class PersonRepoImpl implements PersonRepo {
     public void deletePersonFromList(String firstName, String lastName) {
         try {
             Data data = dataRepository.readData();
-            List<Person> persons = data.getPersons();
+            List<Person> persons = getAllPersons();
             Optional<Person> personToRemove = persons.stream()
                     .filter(person -> person.getFirstName().equals(firstName) && person.getLastName().equals(lastName))
                     .findFirst();
@@ -92,7 +91,7 @@ public class PersonRepoImpl implements PersonRepo {
     public Person updatePerson(Person person) {
         try {
             Data data = dataRepository.readData();
-            List<Person> currentPersons = data.getPersons();
+            List<Person> currentPersons = getAllPersons();
 
             Optional<Person> foundPerson = currentPersons.stream()
                     .filter(currentPerson ->
@@ -130,56 +129,31 @@ public class PersonRepoImpl implements PersonRepo {
 
     @Override
     public List<String> findEmailsByCity(String city) {
-        try {
-            Data data = dataRepository.readData();
-            List<Person> persons = data.getPersons();
+            List<Person> persons = getAllPersons();
             return persons.stream()
                     .filter(person -> person.getCity().equalsIgnoreCase(city))
                     .map(Person::getEmail)
                     .distinct()
                     .toList();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
     }
 
     @Override
     public List<Person> findAllByFirstNameAndLastName(String firstName, String lastName) {
-
-        try {
-            Data data = dataRepository.readData();
-            return data.getPersons().stream()
+            return getAllPersons().stream()
                     .filter(person -> person.getFirstName().equalsIgnoreCase(firstName) && person.getLastName().equalsIgnoreCase(lastName)).toList();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
     }
     @Override
     public List<Person> findPersonsByAddresses(List<String> addresses) {
-
-        try {
-            Data data = dataRepository.readData();
-            return data.getPersons().stream()
+            return getAllPersons().stream()
                     .filter(person -> addresses.contains(person.getAddress()))
                     .toList();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
     }
 
     @Override
     public List<Person> findPersonsByAddress(String address) {
-        try {
-            Data data = dataRepository.readData();
-            return data.getPersons().stream()
+            return getAllPersons().stream()
                     .filter(person -> address.contains(person.getAddress()))
                     .toList();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
     }
 
 }

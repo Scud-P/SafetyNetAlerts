@@ -183,5 +183,32 @@ public class PersonRepoImplTest {
         assertEquals(person2.getAddress(), result.get(1).getAddress());
     }
 
+    @Test
+    public void findPersonsByAddress_shouldReturnAListOfPersonsLivingAtThisAddress() throws IOException {
+
+        Person person = new Person("John", "Doe", "123 Main St", "City", "00000", "12345", "john@example.com");
+        Person person2 = new Person("Jane", "Doe", "123 Main St", "City", "00000", "12345", "jane@example.com");
+        Person person3 = new Person("John", "Smith", "456 Main St", "City", "00000", "12345", "john@example.com");
+        Person person4 = new Person("Jane", "Smith", "456 Main St", "City", "00000", "12345", "jane@example.com");
+
+        List<Person> persons = new ArrayList<>();
+        persons.add(person);
+        persons.add(person2);
+        persons.add(person3);
+        persons.add(person4);
+
+        Data mockData = new Data();
+        mockData.setPersons(persons);
+
+        when(dataRepository.readData()).thenReturn(mockData);
+
+        String address1 = "123 Main St";
+
+        List<Person> result = personRepo.findPersonsByAddress(address1);
+
+        assertEquals(2, result.size());
+        assertEquals(person, result.get(0));
+    }
+
 }
 

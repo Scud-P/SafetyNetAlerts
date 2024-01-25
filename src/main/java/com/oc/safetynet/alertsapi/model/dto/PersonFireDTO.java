@@ -2,9 +2,10 @@ package com.oc.safetynet.alertsapi.model.dto;
 
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
+import lombok.ToString;
 
 import java.util.List;
-
+@ToString
 public class PersonFireDTO {
 
     public PersonFireDTO(String firstName, String lastName, String phone, int age, List<String> medications, List<String> allergies) {
@@ -84,16 +85,4 @@ public class PersonFireDTO {
     private List<String> medications;
     private List<String> allergies;
 
-    @Override
-    public String toString() {
-        final StringBuffer sb = new StringBuffer("PersonFireDTO{");
-        sb.append("firstName='").append(firstName).append('\'');
-        sb.append(", lastName='").append(lastName).append('\'');
-        sb.append(", phone='").append(phone).append('\'');
-        sb.append(", age=").append(age);
-        sb.append(", medications=").append(medications);
-        sb.append(", allergies=").append(allergies);
-        sb.append('}');
-        return sb.toString();
-    }
 }

@@ -149,4 +149,25 @@ public class FireStationRepoImplTest {
 
         assertEquals(3, result.size());
     }
+
+    @Test
+    public void findStationByAddress_shouldReturnThisFireStationNumber() throws IOException {
+
+        FireStation fireStation = new FireStation("test address", 8);
+        FireStation fireStation2 = new FireStation("test address2", 9);
+
+        List<FireStation> fireStations = new ArrayList<>();
+        fireStations.add(fireStation);
+        fireStations.add(fireStation2);
+
+        Data mockData = new Data();
+        mockData.setFireStations(fireStations);
+
+        when(dataRepository.readData()).thenReturn(mockData);
+
+        int result = fireStationRepo.findStationByAddress("test address");
+
+        assertEquals(8, result);
+    }
+
 }

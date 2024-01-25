@@ -2,12 +2,14 @@ package com.oc.safetynet.alertsapi.model.dto;
 
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@ToString
 public class ChildDTO {
 
     private String firstName;
@@ -61,17 +63,6 @@ public class ChildDTO {
 
     public void setFamilyMembers(List<Person> familyMembers) {
         this.familyMembers = familyMembers;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuffer sb = new StringBuffer("ChildDTO{");
-        sb.append("firstName='").append(firstName).append('\'');
-        sb.append(", lastName='").append(lastName).append('\'');
-        sb.append(", age=").append(age);
-        sb.append(", familyMembers=").append(familyMembers);
-        sb.append('}');
-        return sb.toString();
     }
 
     public int calculateAge(String birthDate) {

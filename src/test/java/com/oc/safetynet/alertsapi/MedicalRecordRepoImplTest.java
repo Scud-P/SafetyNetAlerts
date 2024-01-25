@@ -211,4 +211,126 @@ public class MedicalRecordRepoImplTest {
         assertEquals(medicationsBob, result.getMedications());
     }
 
+    @Test
+    public void countMinors_shouldReturnTheAmountOfMinors() throws IOException {
+        List<String> allergiesBob = new ArrayList<>();
+        allergiesBob.add("Capitalism");
+        allergiesBob.add("Pop Music");
+        List<String> medicationsBob = new ArrayList<>();
+        medicationsBob.add("Reggae");
+        medicationsBob.add("Women");
+
+        List<String> allergiesJohn = new ArrayList<>();
+        allergiesJohn.add("Peanuts");
+        allergiesJohn.add("Children");
+        List<String> medicationsJohn = new ArrayList<>();
+        medicationsJohn.add("Meditation");
+        medicationsJohn.add("Gaming");
+
+        MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "01/01/1990", medicationsBob, allergiesBob);
+        MedicalRecord medicalRecord2 = new MedicalRecord("Bob", "Bober", "01/01/2020", medicationsJohn, allergiesJohn);
+
+        List<MedicalRecord> medicalRecords = new ArrayList<>();
+
+        medicalRecords.add(medicalRecord);
+        medicalRecords.add(medicalRecord2);
+
+        Data mockData = new Data();
+        mockData.setMedicalrecords(medicalRecords);
+
+        when(dataRepository.readData()).thenReturn(mockData);
+
+        int result = medicalRecordRepo.countMinors(medicalRecords);
+
+        assertEquals(1, result);
+    }
+
+    @Test
+    public void countMajors_shouldReturnTheAmountOfMajors() throws IOException {
+        List<String> allergiesBob = new ArrayList<>();
+        allergiesBob.add("Capitalism");
+        allergiesBob.add("Pop Music");
+        List<String> medicationsBob = new ArrayList<>();
+        medicationsBob.add("Reggae");
+        medicationsBob.add("Women");
+
+        List<String> allergiesJohn = new ArrayList<>();
+        allergiesJohn.add("Peanuts");
+        allergiesJohn.add("Children");
+        List<String> medicationsJohn = new ArrayList<>();
+        medicationsJohn.add("Meditation");
+        medicationsJohn.add("Gaming");
+
+        MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "01/01/1990", medicationsBob, allergiesBob);
+        MedicalRecord medicalRecord2 = new MedicalRecord("Bob", "Bober", "01/01/2020", medicationsJohn, allergiesJohn);
+
+        List<MedicalRecord> medicalRecords = new ArrayList<>();
+
+        medicalRecords.add(medicalRecord);
+        medicalRecords.add(medicalRecord2);
+
+        Data mockData = new Data();
+        mockData.setMedicalrecords(medicalRecords);
+
+        when(dataRepository.readData()).thenReturn(mockData);
+
+        int result = medicalRecordRepo.countMajors(medicalRecords);
+
+        assertEquals(1, result);
+    }
+
+    @Test
+    public void findMinors_shouldReturnAListOfMinors() throws IOException {
+        List<String> allergiesBob = new ArrayList<>();
+        allergiesBob.add("Capitalism");
+        allergiesBob.add("Pop Music");
+        List<String> medicationsBob = new ArrayList<>();
+        medicationsBob.add("Reggae");
+        medicationsBob.add("Women");
+
+        List<String> allergiesJohn = new ArrayList<>();
+        allergiesJohn.add("Peanuts");
+        allergiesJohn.add("Children");
+        List<String> medicationsJohn = new ArrayList<>();
+        medicationsJohn.add("Meditation");
+        medicationsJohn.add("Gaming");
+
+        MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "01/01/1990", medicationsBob, allergiesBob);
+        MedicalRecord medicalRecord2 = new MedicalRecord("Bob", "Bober", "01/01/2020", medicationsJohn, allergiesJohn);
+
+        List<MedicalRecord> medicalRecords = new ArrayList<>();
+
+        medicalRecords.add(medicalRecord);
+        medicalRecords.add(medicalRecord2);
+
+        Data mockData = new Data();
+        mockData.setMedicalrecords(medicalRecords);
+
+        when(dataRepository.readData()).thenReturn(mockData);
+
+        List<MedicalRecord> result = medicalRecordRepo.findMinors(medicalRecords);
+
+        List<MedicalRecord> expected = List.of(
+                medicalRecord2
+        );
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void calculateAge_shouldReturnTheAgeOfAMedicalRecord () {
+        List<String> allergiesBob = new ArrayList<>();
+        allergiesBob.add("Capitalism");
+        allergiesBob.add("Pop Music");
+        List<String> medicationsBob = new ArrayList<>();
+        medicationsBob.add("Reggae");
+        medicationsBob.add("Women");
+
+        MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "01/01/1990", medicationsBob, allergiesBob);
+
+        int result = medicalRecordRepo.calculateAge(medicalRecord);
+
+        assertEquals(34, result);
+    }
+
 }

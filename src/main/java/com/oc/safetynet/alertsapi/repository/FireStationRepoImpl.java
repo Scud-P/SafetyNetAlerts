@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 public class FireStationRepoImpl implements FireStationRepo {
@@ -40,7 +39,7 @@ public class FireStationRepoImpl implements FireStationRepo {
     public FireStation addFireStationToList(FireStation fireStation) {
         try {
             Data data = dataRepository.readData();
-            List<FireStation> fireStations = data.getFirestations();
+            List<FireStation> fireStations = getAllFireStations();
 
             boolean isDuplicateAddress = fireStations.stream()
                     .anyMatch(existingStation -> existingStation.getAddress().equals(fireStation.getAddress()));
@@ -66,7 +65,7 @@ public class FireStationRepoImpl implements FireStationRepo {
     public void deleteFireStationByNumber(int station) {
         try {
             Data data = dataRepository.readData();
-            List<FireStation> fireStations = data.getFirestations();
+            List<FireStation> fireStations = getAllFireStations();
             Optional<FireStation> removedFireStation = fireStations.stream()
                     .filter(fireStation -> fireStation.getStation() == station)
                     .findFirst();
@@ -91,7 +90,7 @@ public class FireStationRepoImpl implements FireStationRepo {
     public void deleteFireStationByAddress(String address) {
         try {
             Data data = dataRepository.readData();
-            List<FireStation> fireStations = data.getFirestations();
+            List<FireStation> fireStations = getAllFireStations();
             Optional<FireStation> removedFireStation = fireStations.stream()
                     .filter(fireStation -> fireStation.getAddress().equals(address))
                     .findFirst();
@@ -115,10 +114,9 @@ public class FireStationRepoImpl implements FireStationRepo {
     @Override
     public FireStation updateFireStationNumber(FireStation fireStation) {
 
-        System.out.println(fireStation);
         try {
             Data data = dataRepository.readData();
-            List<FireStation> currentFireStations = data.getFirestations();
+            List<FireStation> currentFireStations = getAllFireStations();
             currentFireStations.stream()
                     .filter(currentFireStation -> currentFireStation.getAddress().equals(fireStation.getAddress()))
                     .findFirst()
@@ -139,31 +137,17 @@ public class FireStationRepoImpl implements FireStationRepo {
 
     @Override
     public List<String> findAddressesByStation(int station) {
-        try {
-            Data data = dataRepository.readData();
-
-            return data.getFirestations().stream()
+            return getAllFireStations().stream()
                     .filter(fireStation -> fireStation.getStation() == station)
                     .map(FireStation::getAddress).toList();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
     }
 
     @Override
     public int findStationByAddress(String address) {
-        try {
-            Data data = dataRepository.readData();
-
-            Optional<FireStation> fire = data.getFirestations().stream()
+            Optional<FireStation> fire = getAllFireStations().stream()
                     .filter(fireStation -> fireStation.getAddress().equalsIgnoreCase(address))
                     .findFirst();
 
             return fire.map(FireStation::getStation).orElse(0);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
     }
 }
