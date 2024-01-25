@@ -9,11 +9,11 @@ public interface MedicalRecordRepo {
 
     List<MedicalRecord> getAllMedicalRecords() throws IOException;
 
-    void addMedicalRecordToList(MedicalRecord medicalRecord) throws IOException;
+    MedicalRecord addMedicalRecordToList(MedicalRecord medicalRecord) throws IOException;
 
     void deleteMedicalRecordFromList(String firstName, String lastName);
 
-    void updateMedicalRecord(MedicalRecord medicalRecord);
+    MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord);
 
     List<MedicalRecord> findAllByFirstNameAndLastName(String firstName, String lastName);
 

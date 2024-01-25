@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface PersonRepo {
     List<Person> getAllPersons();
-    void addPersonToList(Person person);
+    Person addPersonToList(Person person);
 
     void deletePersonFromList(String firstName, String lastName);
 
-    void updatePerson(Person person);
+    Person updatePerson(Person person);
 
     List<String> findEmailsByCity(String City);
 

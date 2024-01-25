@@ -3,10 +3,8 @@ package com.oc.safetynet.alertsapi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
 import com.oc.safetynet.alertsapi.model.FireStation;
-import com.oc.safetynet.alertsapi.repository.FireStationRepository;
-import com.oc.safetynet.alertsapi.repository.MedicalRecordRepository;
-import com.oc.safetynet.alertsapi.service.FireStationService;
-import com.oc.safetynet.alertsapi.service.MedicalRecordService;
+import com.oc.safetynet.alertsapi.repository.DataRepository;
+import com.oc.safetynet.alertsapi.repository.FireStationRepoImpl;
 import com.oc.safetynet.alertsapi.service.PersonService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(MedicalRecordController.class)
+@WebMvcTest(FireStationControllerTest.class)
 @ComponentScan(basePackages = "com.oc.safetynet.alertsapi")
 public class FireStationControllerTest {
 
@@ -33,22 +31,17 @@ public class FireStationControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private MedicalRecordService medicalRecordService;
-
-    @MockBean
-    private FireStationService fireStationService;
-
-    @MockBean
-    private MedicalRecordRepository medicalRecordRepository;
-
-    @MockBean
-    private FireStationRepository fireStationRepository;
-
-    @MockBean
     private PersonService personService;
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private FireStationRepoImpl fireStationRepoImpl;
+
+
+    @Autowired
+    private DataRepository dataRepository;
 
     @Test
     public void testGetAllFireStations() throws Exception {
@@ -59,7 +52,7 @@ public class FireStationControllerTest {
                 new FireStation("test address 3", 3)
         );
 
-        when(fireStationService.getAllFireStations()).thenReturn(fireStations);
+        when(fireStationRepoImpl.getAllFireStations()).thenReturn(fireStations);
 
         mockMvc.perform(get("/firestations"))
                 .andExpect(status().isOk())
@@ -75,7 +68,7 @@ public class FireStationControllerTest {
 
         FireStation station = new FireStation("test address", 1);
 
-        when(fireStationService.addFireStation(any(FireStation.class))).thenReturn(station);
+        when(fireStationRepoImpl.addFireStationToList(any())).thenReturn(station);
 
         mockMvc.perform(post("/firestation")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +83,7 @@ public class FireStationControllerTest {
 
         FireStation station = new FireStation("test address", 1);
 
-        when(fireStationService.updateFireStation(any(FireStation.class))).thenReturn(station);
+        when(fireStationRepoImpl.updateFireStationNumber(any())).thenReturn(station);
 
         mockMvc.perform(put("/firestation")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -21,19 +21,9 @@ public class PersonController {
     @Autowired
     private PersonRepoImpl personRepoImpl;
 
-    @GetMapping("/persons")
-    public List<Person> getAllPersons() {
-        return personService.getAllPersons();
-    }
-
-    @GetMapping("/person")
-    public Person getPerson(@RequestParam(name = "firstName") String firstName, @RequestParam(name = "lastName") String lastName) {
-        return personService.getPersonByFirstNameAndLastName(firstName, lastName);
-    }
-
     @PostMapping("/person")
-    public void addPerson(@RequestBody Person person) {
-        personRepoImpl.addPersonToList(person);
+    public Person addPerson(@RequestBody Person person) {
+        return personRepoImpl.addPersonToList(person);
     }
 
     @DeleteMapping("/person")
@@ -44,8 +34,8 @@ public class PersonController {
     }
 
     @PutMapping("/person")
-    public void updatePerson (@RequestBody Person person) {
-        personRepoImpl.updatePerson(person);
+    public Person updatePerson (@RequestBody Person person) {
+        return personRepoImpl.updatePerson(person);
     }
 
 
@@ -54,10 +44,10 @@ public class PersonController {
         return personService.findHomesByAddresses(station);
     }
 
-    @GetMapping(value = "/firestation", params = "stationNumber")
-    public PersonWithCountDTO getPersonsByStation(@RequestParam(name = "stationNumber") int station) {
-        return personService.findPersonsByStation(station);
-    }
+//    @GetMapping(value = "/firestation", params = "stationNumber")
+//    public PersonWithCountDTO getPersonsByStation(@RequestParam(name = "stationNumber") int station) {
+//        return personService.findPersonsByStation(station);
+//    }
 
 //    @GetMapping(value = "/childAlert", params = "address")
 //    public List<ChildDTO> getAllMinorsAtAddress(@RequestParam(name = "address") String address) {
@@ -68,15 +58,15 @@ public class PersonController {
 //    public PersonFireWithStationNumberDTO getAllPersonsAtAddress(@RequestParam(name = "address") String address) {
 //        return personService.findPersonsAtAddress(address);
 //    }
-
-    @PostMapping("/batchperson")
-    public List<Person> addAllPersons(@RequestBody List<Person> persons) {
-        return personService.saveAllPersons(persons);
-    }
-    @GetMapping(value = "/phoneAlert", params = "firestation")
-    public List<String> getPhonesByStation(@RequestParam(name = "firestation") int station) {
-        return personService.findPhonesByStation(station);
-    }
+//
+//    @PostMapping("/batchperson")
+//    public List<Person> addAllPersons(@RequestBody List<Person> persons) {
+//        return personService.saveAllPersons(persons);
+//    }
+//    @GetMapping(value = "/phoneAlert", params = "firestation")
+//    public List<String> getPhonesByStation(@RequestParam(name = "firestation") int station) {
+//        return personService.findPhonesByStation(station);
+//    }
 
     @GetMapping(value = "/communityEmail", params = "city")
     public List<String> getEmailsByCity(@RequestParam(name = "city") String city) {

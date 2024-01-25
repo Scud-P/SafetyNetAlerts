@@ -37,7 +37,7 @@ public class FireStationRepoImpl implements FireStationRepo {
     }
 
     @Override
-    public void addFireStationToList(FireStation fireStation) {
+    public FireStation addFireStationToList(FireStation fireStation) {
         try {
             Data data = dataRepository.readData();
             List<FireStation> fireStations = data.getFirestations();
@@ -53,10 +53,12 @@ public class FireStationRepoImpl implements FireStationRepo {
                 logger.info("FireStation added: {}", fireStation);
                 logger.info("New List of FireStations: {}", data.getFirestations());
                 dataRepository.writeData(data);
+                return fireStation;
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
+        return null;
     }
 
 
@@ -111,7 +113,9 @@ public class FireStationRepoImpl implements FireStationRepo {
     }
 
     @Override
-    public void updateFireStationNumber(FireStation fireStation) {
+    public FireStation updateFireStationNumber(FireStation fireStation) {
+
+        System.out.println(fireStation);
         try {
             Data data = dataRepository.readData();
             List<FireStation> currentFireStations = data.getFirestations();
@@ -126,7 +130,7 @@ public class FireStationRepoImpl implements FireStationRepo {
             logger.info("New List of FireStations: {}", data.getFirestations());
 
             dataRepository.writeData(data);
-
+            return fireStation;
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);

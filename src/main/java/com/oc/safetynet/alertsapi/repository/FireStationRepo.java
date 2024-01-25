@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface FireStationRepo {
     List<FireStation> getAllFireStations();
-    void addFireStationToList(FireStation fireStation);
+    FireStation addFireStationToList(FireStation fireStation);
     void deleteFireStationByAddress(String address);
     void deleteFireStationByNumber(int station);
-    void updateFireStationNumber(FireStation fireStation);
+    FireStation updateFireStationNumber(FireStation fireStation);
     List<String> findAddressesByStation (int station);
 }

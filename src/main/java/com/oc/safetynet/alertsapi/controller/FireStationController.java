@@ -2,10 +2,8 @@ package com.oc.safetynet.alertsapi.controller;
 
 import com.oc.safetynet.alertsapi.model.FireStation;
 import com.oc.safetynet.alertsapi.repository.FireStationRepoImpl;
-import com.oc.safetynet.alertsapi.service.FireStationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.fasterxml.jackson.annotation.JsonView;
 
 
 import java.util.List;
@@ -22,13 +20,13 @@ public class FireStationController {
     }
 
     @PostMapping("/firestation")
-    public void addFireStation(@RequestBody FireStation fireStation) {
-        fireStationRepoImpl.addFireStationToList(fireStation);
+    public FireStation addFireStation(@RequestBody FireStation fireStation) {
+        return fireStationRepoImpl.addFireStationToList(fireStation);
     }
 
     @PutMapping("/firestation")
-    public void updateFireStation(@RequestBody FireStation fireStation) {
-        fireStationRepoImpl.updateFireStationNumber(fireStation);
+    public FireStation updateFireStation(@RequestBody FireStation fireStation) {
+        return fireStationRepoImpl.updateFireStationNumber(fireStation);
     }
 
     @DeleteMapping("/firestation")

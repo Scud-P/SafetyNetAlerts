@@ -2,9 +2,14 @@ package com.oc.safetynet.alertsapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
+import com.oc.safetynet.alertsapi.controller.PersonController;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
+import com.oc.safetynet.alertsapi.model.Person;
+import com.oc.safetynet.alertsapi.model.dto.FamilyMemberDTO;
+import com.oc.safetynet.alertsapi.model.dto.HomeDTO;
 import com.oc.safetynet.alertsapi.repository.DataRepository;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepoImpl;
+import com.oc.safetynet.alertsapi.repository.PersonRepoImpl;
 import com.oc.safetynet.alertsapi.service.PersonService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +28,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(MedicalRecordController.class)
+@WebMvcTest(PersonController.class)
 @ComponentScan(basePackages = "com.oc.safetynet.alertsapi")
-
-public class MedicalRecordControllerTest {
+public class PersonControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,61 +42,40 @@ public class MedicalRecordControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private MedicalRecordRepoImpl medicalRecordRepoImpl;
+    private PersonRepoImpl personRepoImpl;
 
     @Autowired
     private DataRepository dataRepository;
 
     @Test
-    public void testAddMedicalRecord() throws Exception {
+    public void testAddPerson() throws Exception {
 
-        List<String> allergiesBob = new ArrayList<>();
-        allergiesBob.add("Capitalism");
-        allergiesBob.add("Pop Music");
-        List<String> medicationsBob = new ArrayList<>();
-        medicationsBob.add("Reggae");
-        medicationsBob.add("Women");
+        Person person = new Person("Bob", "Ross", "address1", "test city", "test zip", "test phone", "test email");
 
-        MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "1990-01-01", medicationsBob, allergiesBob);
+        when(personRepoImpl.addPersonToList(any(Person.class))).thenReturn(person);
 
-        when(medicalRecordRepoImpl.addMedicalRecordToList(any(MedicalRecord.class))).thenReturn(medicalRecord);
-
-        mockMvc.perform(post("/medicalRecord")
+        mockMvc.perform(post("/person")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(medicalRecord)))
+                        .content(objectMapper.writeValueAsString(person)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("Bob"))
-                .andExpect(jsonPath("$.lastName").value("Bober"))
-                .andExpect(jsonPath("$.medications[0]").value("Reggae"))
-                .andExpect(jsonPath("$.allergies[1]").value("Pop Music"))
+                .andExpect(jsonPath("$.lastName").value("Ross"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
     }
 
     @Test
-    public void testUpdateMedicalRecord() throws Exception {
+    public void testUpdatePerson() throws Exception {
+        Person person = new Person("Bob", "Ross", "address1", "test city", "test zip", "test phone", "test email");
+        when(personRepoImpl.updatePerson(any(Person.class))).thenReturn(person);
 
-        List<String> allergiesBob = new ArrayList<>();
-        allergiesBob.add("Capitalism");
-        allergiesBob.add("Pop Music");
-        List<String> medicationsBob = new ArrayList<>();
-        medicationsBob.add("Reggae");
-        medicationsBob.add("Women");
-
-        MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "1990-01-01", medicationsBob, allergiesBob);
-
-        when(medicalRecordRepoImpl.updateMedicalRecord(any())).thenReturn(medicalRecord);
-
-        mockMvc.perform(put("/medicalRecord")
+        mockMvc.perform(put("/person")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(medicalRecord)))
+                        .content(objectMapper.writeValueAsString(person)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("Bob"))
-                .andExpect(jsonPath("$.lastName").value("Bober"))
-                .andExpect(jsonPath("$.medications[0]").value("Reggae"))
-                .andExpect(jsonPath("$.allergies[1]").value("Pop Music"))
+                .andExpect(jsonPath("$.lastName").value("Ross"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
     }
-
 }

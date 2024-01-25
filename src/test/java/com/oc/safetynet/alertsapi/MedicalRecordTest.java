@@ -11,7 +11,7 @@ import java.util.List;
 public class MedicalRecordTest {
 
     List<String> allergiesBob, medicationsBob, allergiesBob2, medicationsBob2;
-    LocalDate bobBirthDate, bobBirthDate2;
+    String bobBirthDate, bobBirthDate2;
 
 
     @BeforeEach
@@ -30,30 +30,29 @@ public class MedicalRecordTest {
         medicationsBob2.add("Prozac 30mg");
         medicationsBob2.add("Viagra 10mg");
 
-        LocalDate now = LocalDate.now();
-        bobBirthDate = now.minusYears(20);
-        bobBirthDate2 = now.minusYears(25);
+        bobBirthDate = "01/01/2000";
+        bobBirthDate2 = "01/01/2020";
     }
 
 
     @Test
     public void testEquals() {
 
-        MedicalRecord medicalRecord = new  MedicalRecord(1L, "Bob", "Bober", bobBirthDate, medicationsBob, allergiesBob);
+        MedicalRecord medicalRecord = new  MedicalRecord("Bob", "Bober", bobBirthDate, medicationsBob, allergiesBob);
         assertEquals(medicalRecord, medicalRecord);
 
-        MedicalRecord sameMedicalRecord = new  MedicalRecord(1L, "Bob", "Bober", bobBirthDate, medicationsBob, allergiesBob);
+        MedicalRecord sameMedicalRecord = new  MedicalRecord("Bob", "Bober", bobBirthDate, medicationsBob, allergiesBob);
         assertEquals(medicalRecord, sameMedicalRecord);
 
-        MedicalRecord medicalRecord2 =  new MedicalRecord(2L, "Bob2", "Bober2", bobBirthDate2, medicationsBob2, allergiesBob2);
+        MedicalRecord medicalRecord2 =  new MedicalRecord("Bob2", "Bober2", bobBirthDate2, medicationsBob2, allergiesBob2);
         assertNotEquals(medicalRecord2, medicalRecord);
     }
 
     @Test
     public void testHashCodes() {
-        MedicalRecord medicalRecord = new  MedicalRecord(1L, "Bob", "Bober", bobBirthDate, medicationsBob, allergiesBob);
-        MedicalRecord sameMedicalRecord = new  MedicalRecord(1L, "Bob", "Bober", bobBirthDate, medicationsBob, allergiesBob);
-        MedicalRecord medicalRecord2 =  new MedicalRecord(2L, "Bob2", "Bober2", bobBirthDate2, medicationsBob2, allergiesBob2);
+        MedicalRecord medicalRecord = new  MedicalRecord("Bob", "Bober", bobBirthDate, medicationsBob, allergiesBob);
+        MedicalRecord sameMedicalRecord = new  MedicalRecord("Bob", "Bober", bobBirthDate, medicationsBob, allergiesBob);
+        MedicalRecord medicalRecord2 =  new MedicalRecord("Bob2", "Bober2", bobBirthDate2, medicationsBob2, allergiesBob2);
 
         assertEquals(medicalRecord.hashCode(), medicalRecord.hashCode());
         assertEquals(medicalRecord.hashCode(), sameMedicalRecord.hashCode());

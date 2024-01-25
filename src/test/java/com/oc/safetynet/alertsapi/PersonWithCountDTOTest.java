@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PersonWithCountDTOTest {
 
+
     @Test
     public void testPersonWithCountDTODefaultConstructorAndSetters() {
 
@@ -28,7 +29,6 @@ public class PersonWithCountDTOTest {
         assertEquals(5, personWithCountDTO.getMinorCount());
         assertEquals(5, personWithCountDTO.getMajorCount());
         assertIterableEquals(personDTOs, personWithCountDTO.getPersonDTOs());
-
 
     }
 

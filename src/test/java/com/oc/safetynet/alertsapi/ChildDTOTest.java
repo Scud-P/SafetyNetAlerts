@@ -15,8 +15,8 @@ public class ChildDTOTest {
     public void testChildDTODefaultConstructorAndSetters() {
 
         List<Person> familyMembers = List.of(
-                new Person(1L,"Edouard", "Balladur", "test address", "test city", "test zip", "test phone", "test email"),
-                new Person(2L,"Donald", "Trump", "test address", "test city", "test zip", "test phone", "test email" )
+                new Person("Edouard", "Balladur", "test address", "test city", "test zip", "test phone", "test email"),
+                new Person("Donald", "Trump", "test address", "test city", "test zip", "test phone", "test email" )
         );
 
         ChildDTO childDTO = new ChildDTO();

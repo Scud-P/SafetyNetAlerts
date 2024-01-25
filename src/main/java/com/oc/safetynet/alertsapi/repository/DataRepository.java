@@ -14,7 +14,13 @@ import java.io.*;
 @Repository
 public class DataRepository {
 
+    private ObjectMapper objectMapper;
+
     private static final Logger logger = LoggerFactory.getLogger(DataRepository.class);
+
+    public DataRepository(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Value("classpath:data.json")
     private Resource dataResource;
@@ -23,14 +29,14 @@ public class DataRepository {
     private String dataFilePath;
 
     public Data readData() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
         try (InputStream inputStream = getResourceInputStream()) {
             return objectMapper.readValue(inputStream, Data.class);
         }
     }
 
     public void writeData(Data data) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
 
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         logger.info("Writing data to file: {}", dataFilePath);

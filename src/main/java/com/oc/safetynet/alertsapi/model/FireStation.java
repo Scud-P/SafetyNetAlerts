@@ -2,10 +2,11 @@ package com.oc.safetynet.alertsapi.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 
 @Entity
-
+@ToString
 public class FireStation {
 
     private String address;
@@ -15,7 +16,6 @@ public class FireStation {
         this.address = address;
         this.station = station;
     }
-
     public FireStation() {
     }
 
@@ -35,12 +35,4 @@ public class FireStation {
         this.station = station;
     }
 
-    @Override
-    public String toString() {
-        final StringBuffer sb = new StringBuffer("FireStation{");
-        sb.append(", address='").append(address).append('\'');
-        sb.append(", station=").append(station);
-        sb.append('}');
-        return sb.toString();
-    }
 }

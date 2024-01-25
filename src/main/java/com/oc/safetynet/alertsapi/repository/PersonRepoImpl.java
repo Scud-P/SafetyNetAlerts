@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,17 +29,25 @@ public class PersonRepoImpl implements PersonRepo {
     public List<Person> getAllPersons() {
         try {
             Data data = dataRepository.readData();
-            return data.getPersons();
+            List<Person> persons = data.getPersons();
+            if (persons == null) {
+                return Collections.emptyList();
+            }
+            return persons;
         } catch (IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
     }
 
     @Override
-    public void addPersonToList(Person person) {
+    public Person addPersonToList(Person person) {
         try {
             Data data = dataRepository.readData();
             List<Person> persons = data.getPersons();
+
+            if(persons == null) {
+                persons = new ArrayList<>();
+            }
             if (persons.contains(person)) {
                 logger.error("Person with firstName {} and lastName {} already in DB", person.getFirstName(), person.getLastName());
             } else {
@@ -46,10 +56,12 @@ public class PersonRepoImpl implements PersonRepo {
                 logger.info("Person added: {}", person);
                 logger.info("New List of persons: {}", data.getPersons());
                 dataRepository.writeData(data);
+                return person;
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
+        return null;
     }
 
     @Override
@@ -76,7 +88,7 @@ public class PersonRepoImpl implements PersonRepo {
     }
 
     @Override
-    public void updatePerson(Person person) {
+    public Person updatePerson(Person person) {
         try {
             Data data = dataRepository.readData();
             List<Person> currentPersons = data.getPersons();
@@ -104,6 +116,7 @@ public class PersonRepoImpl implements PersonRepo {
                 logger.info("New List of persons: {}", data.getPersons());
 
                 dataRepository.writeData(data);
+                return person;
             } else {
                 logger.error("Person not found for: {} {}", person.getFirstName(), person.getLastName());
             }
@@ -111,6 +124,7 @@ public class PersonRepoImpl implements PersonRepo {
         } catch (IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
+        return null;
     }
 
     @Override
@@ -140,7 +154,6 @@ public class PersonRepoImpl implements PersonRepo {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
     }
-
     @Override
     public List<Person> findPersonsByAddresses(List<String> addresses) {
 

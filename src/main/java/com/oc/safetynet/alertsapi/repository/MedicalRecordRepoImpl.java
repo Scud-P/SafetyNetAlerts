@@ -2,18 +2,14 @@ package com.oc.safetynet.alertsapi.repository;
 
 import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
-import com.oc.safetynet.alertsapi.model.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 public class MedicalRecordRepoImpl implements MedicalRecordRepo {
@@ -35,7 +31,7 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
     }
 
     @Override
-    public void addMedicalRecordToList(MedicalRecord medicalRecord) {
+    public MedicalRecord addMedicalRecordToList(MedicalRecord medicalRecord) {
         try {
             Data data = dataRepository.readData();
             List<MedicalRecord> medicalRecords = data.getMedicalrecords();
@@ -52,10 +48,12 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
                 logger.info("Medical Record added: {}", medicalRecord);
                 logger.info("New List of Medical Records: {}", data.getMedicalrecords());
                 dataRepository.writeData(data);
+                return medicalRecord;
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
+        return null;
     }
 
     @Override
@@ -85,7 +83,7 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
     }
 
     @Override
-    public void updateMedicalRecord(MedicalRecord medicalRecord) {
+    public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord) {
         try {
             Data data = dataRepository.readData();
             List<MedicalRecord> currentMedicalRecords = data.getMedicalrecords();
@@ -108,8 +106,9 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
                 data.setMedicalrecords(currentMedicalRecords);
                 logger.info("Medical Record modified: {}", medicalRecord);
                 logger.info("New List of Medical Records: {}", data.getMedicalrecords());
-
                 dataRepository.writeData(data);
+                return medicalRecord;
+
             } else {
                 logger.error("Medical Record not found for: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
             }
@@ -117,6 +116,7 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
         } catch (IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
+        return null;
     }
 
     @Override
