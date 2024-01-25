@@ -23,7 +23,7 @@ public interface MedicalRecordRepo {
 
     int countMajors(List<MedicalRecord> medicalRecords);
 
-    List<MedicalRecord> findMinors (List<MedicalRecord> medicalRecords);
+    List<MedicalRecord> findMinors(List<MedicalRecord> medicalRecords);
 
     int calculateAge(MedicalRecord medicalRecord);
 

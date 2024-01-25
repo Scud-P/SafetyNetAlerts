@@ -70,7 +70,7 @@ public class FireStationRepoImpl implements FireStationRepo {
                     .filter(fireStation -> fireStation.getStation() == station)
                     .findFirst();
 
-            if(removedFireStation.isPresent()) {
+            if (removedFireStation.isPresent()) {
                 removedFireStation.ifPresent(fireStation -> logger.info("Firestation removed for address: {} and station number: {}",
                         fireStation.getAddress(), fireStation.getStation()));
                 fireStations.removeIf(fireStation -> fireStation.getStation() == station);
@@ -95,7 +95,7 @@ public class FireStationRepoImpl implements FireStationRepo {
                     .filter(fireStation -> fireStation.getAddress().equals(address))
                     .findFirst();
 
-            if(removedFireStation.isPresent()) {
+            if (removedFireStation.isPresent()) {
                 removedFireStation.ifPresent(fireStation -> logger.info("Firestation removed for address: {} and station number: {}",
                         fireStation.getAddress(), fireStation.getStation()));
                 fireStations.removeIf(fireStation -> fireStation.getAddress().equals(address));
@@ -137,17 +137,17 @@ public class FireStationRepoImpl implements FireStationRepo {
 
     @Override
     public List<String> findAddressesByStation(int station) {
-            return getAllFireStations().stream()
-                    .filter(fireStation -> fireStation.getStation() == station)
-                    .map(FireStation::getAddress).toList();
+        return getAllFireStations().stream()
+                .filter(fireStation -> fireStation.getStation() == station)
+                .map(FireStation::getAddress).toList();
     }
 
     @Override
     public int findStationByAddress(String address) {
-            Optional<FireStation> fire = getAllFireStations().stream()
-                    .filter(fireStation -> fireStation.getAddress().equalsIgnoreCase(address))
-                    .findFirst();
+        Optional<FireStation> fire = getAllFireStations().stream()
+                .filter(fireStation -> fireStation.getAddress().equalsIgnoreCase(address))
+                .findFirst();
 
-            return fire.map(FireStation::getStation).orElse(0);
+        return fire.map(FireStation::getStation).orElse(0);
     }
 }

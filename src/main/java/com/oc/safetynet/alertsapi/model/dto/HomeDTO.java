@@ -1,7 +1,5 @@
 package com.oc.safetynet.alertsapi.model.dto;
 
-import com.oc.safetynet.alertsapi.model.Person;
-
 import java.util.List;
 import java.util.Objects;
 

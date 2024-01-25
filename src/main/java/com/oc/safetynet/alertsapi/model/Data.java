@@ -1,4 +1,5 @@
 package com.oc.safetynet.alertsapi.model;
+
 import lombok.ToString;
 
 import java.util.ArrayList;

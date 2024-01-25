@@ -30,6 +30,7 @@ public class FamilyMemberDTO {
                 Objects.equals(allergies, that.allergies) &&
                 Objects.equals(medications, that.medications);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(firstName, lastName, phone, age, allergies, medications);

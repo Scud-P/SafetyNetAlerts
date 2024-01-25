@@ -5,6 +5,7 @@ import com.oc.safetynet.alertsapi.model.Person;
 import lombok.ToString;
 
 import java.util.List;
+
 @ToString
 public class PersonFireDTO {
 

@@ -41,7 +41,6 @@ public class DataRepository {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         logger.info("Writing data to file: {}", dataFilePath);
 
-        // Write the Data object to the specified file path
         try (OutputStream outputStream = new FileOutputStream(dataFilePath)) {
             objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
             objectMapper.writeValue(outputStream, data);

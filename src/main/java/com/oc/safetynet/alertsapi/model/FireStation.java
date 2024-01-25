@@ -1,7 +1,6 @@
 package com.oc.safetynet.alertsapi.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.ToString;
 
 
@@ -12,10 +11,11 @@ public class FireStation {
     private String address;
     private int station;
 
-    public FireStation( String address, int station) {
+    public FireStation(String address, int station) {
         this.address = address;
         this.station = station;
     }
+
     public FireStation() {
     }
 

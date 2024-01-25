@@ -45,7 +45,7 @@ public class PersonRepoImpl implements PersonRepo {
             Data data = dataRepository.readData();
             List<Person> persons = getAllPersons();
 
-            if(persons == null) {
+            if (persons == null) {
                 persons = new ArrayList<>();
             }
             if (persons.contains(person)) {
@@ -129,31 +129,34 @@ public class PersonRepoImpl implements PersonRepo {
 
     @Override
     public List<String> findEmailsByCity(String city) {
-            List<Person> persons = getAllPersons();
-            return persons.stream()
-                    .filter(person -> person.getCity().equalsIgnoreCase(city))
-                    .map(Person::getEmail)
-                    .distinct()
-                    .toList();
+        List<Person> persons = getAllPersons();
+        List<String> emails = persons.stream()
+                .filter(person -> person.getCity().equalsIgnoreCase(city))
+                .map(Person::getEmail)
+                .distinct()
+                .toList();
+        logger.info("Emails for City {}: {}", city, emails);
+        return emails;
     }
 
     @Override
     public List<Person> findAllByFirstNameAndLastName(String firstName, String lastName) {
-            return getAllPersons().stream()
-                    .filter(person -> person.getFirstName().equalsIgnoreCase(firstName) && person.getLastName().equalsIgnoreCase(lastName)).toList();
+        return getAllPersons().stream()
+                .filter(person -> person.getFirstName().equalsIgnoreCase(firstName) && person.getLastName().equalsIgnoreCase(lastName)).toList();
     }
+
     @Override
     public List<Person> findPersonsByAddresses(List<String> addresses) {
-            return getAllPersons().stream()
-                    .filter(person -> addresses.contains(person.getAddress()))
-                    .toList();
+        return getAllPersons().stream()
+                .filter(person -> addresses.contains(person.getAddress()))
+                .toList();
     }
 
     @Override
     public List<Person> findPersonsByAddress(String address) {
-            return getAllPersons().stream()
-                    .filter(person -> address.contains(person.getAddress()))
-                    .toList();
+        return getAllPersons().stream()
+                .filter(person -> address.contains(person.getAddress()))
+                .toList();
     }
 
 }

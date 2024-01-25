@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface PersonRepo {
     List<Person> getAllPersons();
+
     Person addPersonToList(Person person);
 
     void deletePersonFromList(String firstName, String lastName);

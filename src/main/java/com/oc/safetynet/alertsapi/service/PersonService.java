@@ -33,20 +33,26 @@ public class PersonService {
     public List<PersonInfoDTO> findPersonInfoListDTO(String firstName, String lastName) {
 
         List<Person> persons = personRepoImpl.findAllByFirstNameAndLastName(firstName, lastName);
+        logger.debug("List of persons found for {} {}: {}", firstName, lastName, persons);
         List<MedicalRecord> medicalRecords = medicalRecordRepoImpl.findAllByFirstNameAndLastName(firstName, lastName);
+        logger.debug("List of Medical Records found for {} {}: {}", firstName, lastName, medicalRecords);
+
 
         List<PersonInfoDTO> findPersonInfoListDTO = persons.stream()
                 .flatMap(person -> medicalRecords.stream()
                         .filter(medicalRecord -> isSamePerson(person, medicalRecord))
                         .map(medicalRecord -> new PersonInfoDTO(person, medicalRecord)))
                 .toList();
+        logger.info("Information found for person(s): {}", findPersonInfoListDTO.toString());
         return findPersonInfoListDTO;
     }
 
 
     public List<HomeDTO> findHomesByAddresses(int station) {
         List<String> addresses = fireStationRepoImpl.findAddressesByStation(station);
-        return addresses.stream()
+        logger.debug("List of addresses covered by Fire Station number {}: {}", station, addresses);
+
+        List<HomeDTO> homeDTOS = addresses.stream()
                 .map(address -> {
                     List<Person> persons = personRepoImpl.findPersonsByAddresses(Collections.singletonList(address));
                     List<FamilyMemberDTO> familyMemberDTOS = persons.stream()
@@ -58,14 +64,19 @@ public class PersonService {
                     return new HomeDTO(address, familyMemberDTOS);
                 })
                 .toList();
+
+        logger.info("List of households covered by Fire Station number {}: {}", station, homeDTOS.toString());
+        return homeDTOS;
     }
 
     public List<String> findPhonesByStation(int station) {
         List<String> addresses = fireStationRepoImpl.findAddressesByStation(station);
+        logger.debug("List of addresses corresponding to FireStation number {}: {}", station, addresses);
         List<String> phones = personRepoImpl.findPersonsByAddresses(addresses).stream()
                 .map(Person::getPhone)
                 .distinct()
                 .toList();
+        logger.info("List of phone numbers found for addresses {} covered by station {}: {}", addresses, station, phones);
         return phones;
     }
 
@@ -110,6 +121,7 @@ public class PersonService {
                 minors.add(minor);
             }
         }
+        logger.info("Minors found at address {}: {}", address, minors.toString());
         return minors;
     }
 

@@ -28,13 +28,13 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
 
 
     @Override
-    public List<MedicalRecord> getAllMedicalRecords()  {
+    public List<MedicalRecord> getAllMedicalRecords() {
         try {
             Data data = dataRepository.readData();
             return data.getMedicalrecords();
 
         } catch (IOException e) {
-        throw new RuntimeException("Failed to read data from the repository", e);
+            throw new RuntimeException("Failed to read data from the repository", e);
         }
     }
 
@@ -129,17 +129,17 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
 
     @Override
     public List<MedicalRecord> findAllByFirstNameAndLastName(String firstName, String lastName) {
-            return getAllMedicalRecords().stream()
-                    .filter(medicalRecord -> medicalRecord.getFirstName().equalsIgnoreCase(firstName) && medicalRecord.getLastName().equalsIgnoreCase(lastName))
-                    .toList();
+        return getAllMedicalRecords().stream()
+                .filter(medicalRecord -> medicalRecord.getFirstName().equalsIgnoreCase(firstName) && medicalRecord.getLastName().equalsIgnoreCase(lastName))
+                .toList();
     }
 
     @Override
     public MedicalRecord findByFirstNameAndLastName(String firstName, String lastName) {
-            return getAllMedicalRecords().stream()
-                    .filter(medicalRecord -> medicalRecord.getFirstName().equalsIgnoreCase(firstName) && medicalRecord.getLastName().equalsIgnoreCase(lastName))
-                    .findFirst()
-                    .orElse(null);
+        return getAllMedicalRecords().stream()
+                .filter(medicalRecord -> medicalRecord.getFirstName().equalsIgnoreCase(firstName) && medicalRecord.getLastName().equalsIgnoreCase(lastName))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -175,7 +175,7 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
         return medicalRecords.stream()
                 .filter(medicalRecord -> {
                     LocalDate birthDate = LocalDate.parse(medicalRecord.getBirthdate(), formatter);
-                    int age = Period.between(birthDate,now).getYears();
+                    int age = Period.between(birthDate, now).getYears();
                     return age < 18;
                 })
                 .toList();
