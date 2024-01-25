@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -91,5 +92,36 @@ public class FireStationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.address").value("test address"))
                 .andExpect(jsonPath("$.station").value(1));
+    }
+
+    @Test
+    public void testDeleteFireStationByNumber() throws Exception {
+        int stationNumber = 1;
+
+        doNothing().when(fireStationRepoImpl).deleteFireStationByNumber(stationNumber);
+
+        mockMvc.perform(delete("/firestation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new FireStation(null, stationNumber))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testDeleteFireStationByAddress() throws Exception {
+        String address = "123 Main St";
+
+        doNothing().when(fireStationRepoImpl).deleteFireStationByAddress(address);
+
+        mockMvc.perform(delete("/firestation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new FireStation(address, 0))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testDeleteFireStationWithNoParams() throws Exception {
+        mockMvc.perform(delete("/firestation")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }

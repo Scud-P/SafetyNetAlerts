@@ -3,10 +3,7 @@ package com.oc.safetynet.alertsapi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oc.safetynet.alertsapi.controller.PersonController;
 import com.oc.safetynet.alertsapi.model.Person;
-import com.oc.safetynet.alertsapi.model.dto.ChildDTO;
-import com.oc.safetynet.alertsapi.model.dto.HomeDTO;
-import com.oc.safetynet.alertsapi.model.dto.PersonFireWithStationNumberDTO;
-import com.oc.safetynet.alertsapi.model.dto.PersonWithCountDTO;
+import com.oc.safetynet.alertsapi.model.dto.*;
 import com.oc.safetynet.alertsapi.repository.DataRepository;
 import com.oc.safetynet.alertsapi.repository.PersonRepoImpl;
 import com.oc.safetynet.alertsapi.service.PersonService;
@@ -18,7 +15,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -75,6 +74,20 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("$.lastName").value("Ross"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
+    }
+
+    @Test
+    public void testDeletePerson() throws Exception {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("firstName", "John");
+        requestBody.put("lastName", "Doe");
+
+        doNothing().when(personRepoImpl).deletePersonFromList("John", "Doe");
+
+        mockMvc.perform(delete("/person")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -156,6 +169,28 @@ public class PersonControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(emails.size()));
+    }
+
+    @Test
+    public void getPersonInfoListTest() throws Exception {
+
+        List<PersonInfoDTO> personInfoDTOS = List.of(
+                new PersonInfoDTO(),
+                new PersonInfoDTO()
+        );
+
+        String firstName = "Bob";
+        String lastName = "Ross";
+
+        when(personService.findPersonInfoListDTO(any(), any())).thenReturn(personInfoDTOS);
+
+        mockMvc.perform(get("/personInfo")
+                        .param("firstName", firstName)
+                        .param("lastName", lastName))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(personInfoDTOS.size()));
     }
 }
 

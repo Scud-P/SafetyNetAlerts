@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -93,6 +94,19 @@ public class MedicalRecordControllerTest {
                 .andExpect(jsonPath("$.allergies[1]").value("Pop Music"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
+    }
+
+    @Test
+    public void testDeleteMedicalRecord() throws Exception {
+        String firstName = "John";
+        String lastName = "Doe";
+
+        doNothing().when(medicalRecordRepoImpl).deleteMedicalRecordFromList(firstName, lastName);
+
+        mockMvc.perform(delete("/medicalRecord")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("firstName", firstName, "lastName", lastName))))
+                .andExpect(status().isOk());
     }
 
 }
