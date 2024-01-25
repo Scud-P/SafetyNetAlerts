@@ -1,5 +1,8 @@
 package com.oc.safetynet.alertsapi.model.dto;
 
+import com.oc.safetynet.alertsapi.model.MedicalRecord;
+import com.oc.safetynet.alertsapi.model.Person;
+
 import java.util.List;
 
 public class PersonFireDTO {
@@ -14,6 +17,15 @@ public class PersonFireDTO {
     }
 
     public PersonFireDTO() {
+    }
+
+    public PersonFireDTO(Person person, MedicalRecord medicalRecord, int age) {
+        this.firstName = person.getFirstName();
+        this.lastName = person.getLastName();
+        this.phone = person.getPhone();
+        this.age = age;
+        this.medications = medicalRecord.getMedications();
+        this.allergies = medicalRecord.getAllergies();
     }
 
     public String getFirstName() {

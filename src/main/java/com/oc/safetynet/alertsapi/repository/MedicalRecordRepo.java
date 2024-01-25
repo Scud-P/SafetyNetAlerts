@@ -19,4 +19,12 @@ public interface MedicalRecordRepo {
 
     MedicalRecord findByFirstNameAndLastName(String firstName, String lastName);
 
+    int countMinors(List<MedicalRecord> medicalRecords);
+
+    int countMajors(List<MedicalRecord> medicalRecords);
+
+    List<MedicalRecord> findMinors (List<MedicalRecord> medicalRecords);
+
+    int calculateAge(MedicalRecord medicalRecord);
+
 }

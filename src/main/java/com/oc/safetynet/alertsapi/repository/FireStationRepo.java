@@ -11,4 +11,6 @@ public interface FireStationRepo {
     void deleteFireStationByNumber(int station);
     FireStation updateFireStationNumber(FireStation fireStation);
     List<String> findAddressesByStation (int station);
+    int findStationByAddress (String address);
+
 }

@@ -44,29 +44,25 @@ public class PersonController {
         return personService.findHomesByAddresses(station);
     }
 
-//    @GetMapping(value = "/firestation", params = "stationNumber")
-//    public PersonWithCountDTO getPersonsByStation(@RequestParam(name = "stationNumber") int station) {
-//        return personService.findPersonsByStation(station);
-//    }
+    @GetMapping(value = "/firestation", params = "stationNumber")
+    public PersonWithCountDTO getPersonsByStation(@RequestParam(name = "stationNumber") int station) {
+        return personService.findPersonsByStation(station);
+    }
 
-//    @GetMapping(value = "/childAlert", params = "address")
-//    public List<ChildDTO> getAllMinorsAtAddress(@RequestParam(name = "address") String address) {
-//        return personService.findMinorsAtAddress(address);
-//    }
+    @GetMapping(value = "/childAlert", params = "address")
+    public List<ChildDTO> getAllMinorsAtAddress(@RequestParam(name = "address") String address) {
+        return personService.findMinorsAtAddress(address);
+    }
 
-//    @GetMapping(value = "/fire", params = "address")
-//    public PersonFireWithStationNumberDTO getAllPersonsAtAddress(@RequestParam(name = "address") String address) {
-//        return personService.findPersonsAtAddress(address);
-//    }
-//
-//    @PostMapping("/batchperson")
-//    public List<Person> addAllPersons(@RequestBody List<Person> persons) {
-//        return personService.saveAllPersons(persons);
-//    }
-//    @GetMapping(value = "/phoneAlert", params = "firestation")
-//    public List<String> getPhonesByStation(@RequestParam(name = "firestation") int station) {
-//        return personService.findPhonesByStation(station);
-//    }
+    @GetMapping(value = "/fire", params = "address")
+    public PersonFireWithStationNumberDTO getAllPersonsAtAddress(@RequestParam(name = "address") String address) {
+        return personService.findPersonsAtAddress(address);
+    }
+
+    @GetMapping(value = "/phoneAlert", params = "firestation")
+    public List<String> getPhonesByStation(@RequestParam(name = "firestation") int station) {
+        return personService.findPhonesByStation(station);
+    }
 
     @GetMapping(value = "/communityEmail", params = "city")
     public List<String> getEmailsByCity(@RequestParam(name = "city") String city) {

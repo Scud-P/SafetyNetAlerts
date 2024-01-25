@@ -5,9 +5,13 @@ import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -145,4 +149,53 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
     }
+
+    @Override
+    public int countMinors(List<MedicalRecord> medicalRecords) {
+        LocalDate now = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        long minorCount = medicalRecords.stream()
+                .map(MedicalRecord::getBirthdate)
+                .map(dateString -> LocalDate.parse(dateString, formatter))
+                .map(birthDate -> Period.between(birthDate, now).getYears())
+                .filter(age -> age < 18)
+                .count();
+        return (int) minorCount;
+    }
+
+    @Override
+    public int countMajors(List<MedicalRecord> medicalRecords) {
+        LocalDate now = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        long majorCount = medicalRecords.stream()
+                .map(MedicalRecord::getBirthdate)
+                .map(dateString -> LocalDate.parse(dateString, formatter))
+                .map(birthDate -> Period.between(birthDate, now).getYears())
+                .filter(age -> age > 18)
+                .count();
+        return (int) majorCount;
+    }
+
+    @Override
+    public List<MedicalRecord> findMinors(List<MedicalRecord> medicalRecords) {
+        LocalDate now = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        return medicalRecords.stream()
+                .filter(medicalRecord -> {
+                    LocalDate birthDate = LocalDate.parse(medicalRecord.getBirthdate(), formatter);
+                    int age = Period.between(birthDate,now).getYears();
+                    return age < 18;
+                })
+                .toList();
+    }
+
+    @Override
+    public int calculateAge(MedicalRecord medicalRecord) {
+        LocalDate now = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        LocalDate birthDate = LocalDate.parse(medicalRecord.getBirthdate(), formatter);
+        return Period.between(birthDate, now).getYears();
+    }
+
+
 }

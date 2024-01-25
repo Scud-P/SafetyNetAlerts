@@ -1,7 +1,11 @@
 package com.oc.safetynet.alertsapi.model.dto;
 
+import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ChildDTO {
@@ -19,6 +23,12 @@ public class ChildDTO {
     }
 
     public ChildDTO() {
+    }
+
+    public ChildDTO(Person person, MedicalRecord medicalRecord) {
+        this.firstName = person.getFirstName();
+        this.lastName = person.getLastName();
+        this.age = calculateAge(medicalRecord.getBirthdate());
     }
 
     public String getFirstName() {
@@ -62,5 +72,13 @@ public class ChildDTO {
         sb.append(", familyMembers=").append(familyMembers);
         sb.append('}');
         return sb.toString();
+    }
+
+    public int calculateAge(String birthDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        LocalDate birthLocalDate = LocalDate.parse(birthDate, formatter);
+        LocalDate now = LocalDate.now();
+        Period period = Period.between(birthLocalDate, now);
+        return period.getYears();
     }
 }

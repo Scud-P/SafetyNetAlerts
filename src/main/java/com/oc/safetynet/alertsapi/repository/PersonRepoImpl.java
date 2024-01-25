@@ -1,6 +1,7 @@
 package com.oc.safetynet.alertsapi.repository;
 
 import com.oc.safetynet.alertsapi.model.Data;
+import com.oc.safetynet.alertsapi.model.FireStation;
 import com.oc.safetynet.alertsapi.model.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,6 +162,19 @@ public class PersonRepoImpl implements PersonRepo {
             Data data = dataRepository.readData();
             return data.getPersons().stream()
                     .filter(person -> addresses.contains(person.getAddress()))
+                    .toList();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read data from the repository", e);
+        }
+    }
+
+    @Override
+    public List<Person> findPersonsByAddress(String address) {
+        try {
+            Data data = dataRepository.readData();
+            return data.getPersons().stream()
+                    .filter(person -> address.contains(person.getAddress()))
                     .toList();
 
         } catch (IOException e) {

@@ -150,4 +150,20 @@ public class FireStationRepoImpl implements FireStationRepo {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
     }
+
+    @Override
+    public int findStationByAddress(String address) {
+        try {
+            Data data = dataRepository.readData();
+
+            Optional<FireStation> fire = data.getFirestations().stream()
+                    .filter(fireStation -> fireStation.getAddress().equalsIgnoreCase(address))
+                    .findFirst();
+
+            return fire.map(FireStation::getStation).orElse(0);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read data from the repository", e);
+        }
+    }
 }
