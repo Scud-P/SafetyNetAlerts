@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class FireStationRepoImplTest {
@@ -40,110 +39,83 @@ public class FireStationRepoImplTest {
     }
 
     @Test
-    public void getAllFireStations_IOExceptionThrown_ShouldThrowRuntimeException() throws IOException {
-        when(dataRepository.readData()).thenThrow(new IOException("Mocked IOException"));
-        assertThrows(RuntimeException.class, () -> fireStationRepo.getAllFireStations());
-    }
-
-    @Test
-    public void addPersonToList_ShouldAddPersonToList() throws IOException {
-
+    public void addFireStationToList_ShouldAddPersonToList() {
         FireStation fireStation = new FireStation("test address", 8);
-
-        Data mockData = new Data();
-
-        when(dataRepository.readData()).thenReturn(mockData);
 
         fireStationRepo.addFireStationToList(fireStation);
 
-        assertEquals(1, mockData.getFirestations().size());
-        assertEquals(fireStation, mockData.getFirestations().get(0));
+        List<FireStation> updatedFirestations = fireStationRepo.getAllFireStations();
 
-        verify(dataRepository, times(1)).writeData(mockData);
+        assertEquals(1, updatedFirestations.size());
+        assertEquals(fireStation, updatedFirestations.get(0));
     }
 
     @Test
-    public void updateFireStation_shouldUpdateAFireStation() throws IOException {
+    public void updateFireStation_shouldUpdateAFireStation() {
 
         FireStation fireStation = new FireStation("test address", 8);
         FireStation fireStation2 = new FireStation("test address2", 9);
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
-        fireStations.add(fireStation2);
+        fireStationRepo.addFireStationToList(fireStation);
+        fireStationRepo.addFireStationToList(fireStation2);
 
-        Data mockData = new Data();
-        mockData.setFireStations(fireStations);
-
-        when(dataRepository.readData()).thenReturn(mockData);
 
         FireStation fireStation3 = new FireStation("test address", 10);
 
         fireStationRepo.updateFireStationNumber(fireStation3);
 
-        assertEquals(2, mockData.getFirestations().size());
-        assertEquals(10, mockData.getFirestations().get(0).getStation());
+        List<FireStation> updatedFireStations = fireStationRepo.getAllFireStations();
+
+        assertEquals(2, updatedFireStations.size());
+        assertEquals(10, updatedFireStations.get(0).getStation());
     }
 
     @Test
-    public void deleteFireStationByNumberTest() throws IOException {
+    public void deleteFireStationByNumberTest() {
 
         FireStation fireStation = new FireStation("test address", 8);
         FireStation fireStation2 = new FireStation("test address2", 9);
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
-        fireStations.add(fireStation2);
-
-        Data mockData = new Data();
-        mockData.setFireStations(fireStations);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        fireStationRepo.addFireStationToList(fireStation);
+        fireStationRepo.addFireStationToList(fireStation2);
 
         fireStationRepo.deleteFireStationByNumber(8);
 
-        assertEquals(1, mockData.getFirestations().size());
-        assertEquals(9, mockData.getFirestations().get(0).getStation());
+        List<FireStation> updatedFireStations = fireStationRepo.getAllFireStations();
+
+        assertEquals(1, updatedFireStations.size());
+        assertEquals(9, updatedFireStations.get(0).getStation());
     }
 
     @Test
-    public void deleteFireStationByAddressTest() throws IOException {
+    public void deleteFireStationByAddressTest() {
 
         FireStation fireStation = new FireStation("test address", 8);
         FireStation fireStation2 = new FireStation("test address2", 9);
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
-        fireStations.add(fireStation2);
-
-        Data mockData = new Data();
-        mockData.setFireStations(fireStations);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        fireStationRepo.addFireStationToList(fireStation);
+        fireStationRepo.addFireStationToList(fireStation2);
 
         fireStationRepo.deleteFireStationByAddress("test address2");
 
-        assertEquals(1, mockData.getFirestations().size());
-        assertEquals(8, mockData.getFirestations().get(0).getStation());
+        List<FireStation> updatedFireStations = fireStationRepo.getAllFireStations();
+
+
+        assertEquals(1, updatedFireStations.size());
+        assertEquals(8, updatedFireStations.get(0).getStation());
     }
 
     @Test
-    public void findAddressesByStationTest() throws IOException {
+    public void findAddressesByStationTest() {
         FireStation fireStation = new FireStation("test address", 8);
         FireStation fireStation2 = new FireStation("test address2", 9);
         FireStation fireStation3 = new FireStation("test address3", 9);
         FireStation fireStation4 = new FireStation("test address4", 9);
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
-        fireStations.add(fireStation2);
-        fireStations.add(fireStation3);
-        fireStations.add(fireStation4);
-
-        Data mockData = new Data();
-        mockData.setFireStations(fireStations);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        fireStationRepo.addFireStationToList(fireStation);
+        fireStationRepo.addFireStationToList(fireStation2);
+        fireStationRepo.addFireStationToList(fireStation3);
+        fireStationRepo.addFireStationToList(fireStation4);
 
         List<String> result = fireStationRepo.findAddressesByStation(9);
 
@@ -151,19 +123,13 @@ public class FireStationRepoImplTest {
     }
 
     @Test
-    public void findStationByAddress_shouldReturnThisFireStationNumber() throws IOException {
+    public void findStationByAddress_shouldReturnThisFireStationNumber() {
 
         FireStation fireStation = new FireStation("test address", 8);
         FireStation fireStation2 = new FireStation("test address2", 9);
 
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(fireStation);
-        fireStations.add(fireStation2);
-
-        Data mockData = new Data();
-        mockData.setFireStations(fireStations);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        fireStationRepo.addFireStationToList(fireStation);
+        fireStationRepo.addFireStationToList(fireStation2);
 
         int result = fireStationRepo.findStationByAddress("test address");
 

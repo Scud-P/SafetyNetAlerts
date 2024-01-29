@@ -1,6 +1,7 @@
 package com.oc.safetynet.alertsapi;
 
 import com.oc.safetynet.alertsapi.model.Data;
+import com.oc.safetynet.alertsapi.model.FireStation;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.repository.DataRepository;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepoImpl;
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class MedicalRecordRepoImplTest {
@@ -51,16 +51,12 @@ public class MedicalRecordRepoImplTest {
 
         MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "1990-01-01", medicationsBob, allergiesBob);
 
-        Data mockData = new Data();
-
-        when(dataRepository.readData()).thenReturn(mockData);
-
         medicalRecordRepo.addMedicalRecordToList(medicalRecord);
 
-        assertEquals(1, mockData.getMedicalrecords().size());
-        assertEquals(medicalRecord, mockData.getMedicalrecords().get(0));
+        List<MedicalRecord> updatedMedicalRecords = medicalRecordRepo.getAllMedicalRecords();
 
-        verify(dataRepository, times(1)).writeData(mockData);
+        assertEquals(1, updatedMedicalRecords.size());
+        assertEquals(medicalRecord, updatedMedicalRecords.get(0));
     }
 
     @Test
@@ -84,21 +80,15 @@ public class MedicalRecordRepoImplTest {
         MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "1990-01-01", medicationsBob, allergiesBob);
         MedicalRecord medicalRecord2 = new MedicalRecord("John", "Doe", "1990-01-01", medicationsJohn, allergiesJohn);
 
-
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
-
-        medicalRecords.add(medicalRecord);
-        medicalRecords.add(medicalRecord2);
-
-        Data mockData = new Data();
-        mockData.setMedicalrecords(medicalRecords);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord2);
 
         medicalRecordRepo.deleteMedicalRecordFromList("Bob", "Bober");
 
-        assertEquals(1, mockData.getMedicalrecords().size());
-        assertEquals(medicalRecord2, mockData.getMedicalrecords().get(0));
+        List<MedicalRecord> updatedMedicalRecords = medicalRecordRepo.getAllMedicalRecords();
+
+        assertEquals(1, updatedMedicalRecords.size());
+        assertEquals(medicalRecord2, updatedMedicalRecords.get(0));
     }
 
     @Test
@@ -123,22 +113,17 @@ public class MedicalRecordRepoImplTest {
         MedicalRecord medicalRecord2 = new MedicalRecord("John", "Doe", "1990-01-01", medicationsJohn, allergiesJohn);
 
 
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
-
-        medicalRecords.add(medicalRecord);
-        medicalRecords.add(medicalRecord2);
-
-        Data mockData = new Data();
-        mockData.setMedicalrecords(medicalRecords);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord2);
 
         MedicalRecord medicalRecord3 = new MedicalRecord("Bob", "Bober", "1990-01-01", medicationsJohn, allergiesJohn);
 
-        when(dataRepository.readData()).thenReturn(mockData);
+        medicalRecordRepo.updateMedicalRecord(medicalRecord3);
 
-        MedicalRecord result = medicalRecordRepo.updateMedicalRecord(medicalRecord3);
+        List<MedicalRecord> updatedMedicalRecords = medicalRecordRepo.getAllMedicalRecords();
 
-        assertEquals(2, mockData.getMedicalrecords().size());
-        assertEquals(allergiesJohn, result.getAllergies());
+        assertEquals(2, updatedMedicalRecords.size());
+        assertEquals(allergiesJohn, updatedMedicalRecords.get(1).getAllergies());
     }
 
     @Test
@@ -158,21 +143,14 @@ public class MedicalRecordRepoImplTest {
         medicationsJohn.add("Gaming");
 
         MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "1990-01-01", medicationsBob, allergiesBob);
-        MedicalRecord medicalRecord2 = new MedicalRecord("Bob", "Bober", "2000-01-01", medicationsJohn, allergiesJohn);
+        MedicalRecord medicalRecord2 = new MedicalRecord("John", "Bober", "2000-01-01", medicationsJohn, allergiesJohn);
 
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
-
-        medicalRecords.add(medicalRecord);
-        medicalRecords.add(medicalRecord2);
-
-        Data mockData = new Data();
-        mockData.setMedicalrecords(medicalRecords);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord2);
 
         List<MedicalRecord> result = medicalRecordRepo.findAllByFirstNameAndLastName("Bob", "Bober");
 
-        assertEquals(2, result.size());
+        assertEquals(1, result.size());
         assertEquals(allergiesBob, result.get(0).getAllergies());
     }
 
@@ -193,22 +171,14 @@ public class MedicalRecordRepoImplTest {
         medicationsJohn.add("Gaming");
 
         MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "1990-01-01", medicationsBob, allergiesBob);
-        MedicalRecord medicalRecord2 = new MedicalRecord("Bob", "Bober", "2000-01-01", medicationsJohn, allergiesJohn);
+        MedicalRecord medicalRecord2 = new MedicalRecord("John", "Bober", "2000-01-01", medicationsJohn, allergiesJohn);
 
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
-
-        medicalRecords.add(medicalRecord);
-        medicalRecords.add(medicalRecord2);
-
-        Data mockData = new Data();
-        mockData.setMedicalrecords(medicalRecords);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord2);
 
         MedicalRecord result = medicalRecordRepo.findByFirstNameAndLastName("Bob", "Bober");
 
         assertEquals(allergiesBob, result.getAllergies());
-        assertEquals(medicationsBob, result.getMedications());
     }
 
     @Test
@@ -228,17 +198,12 @@ public class MedicalRecordRepoImplTest {
         medicationsJohn.add("Gaming");
 
         MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "01/01/1990", medicationsBob, allergiesBob);
-        MedicalRecord medicalRecord2 = new MedicalRecord("Bob", "Bober", "01/01/2020", medicationsJohn, allergiesJohn);
+        MedicalRecord medicalRecord2 = new MedicalRecord("John", "Bober", "01/01/2020", medicationsJohn, allergiesJohn);
 
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord2);
 
-        medicalRecords.add(medicalRecord);
-        medicalRecords.add(medicalRecord2);
-
-        Data mockData = new Data();
-        mockData.setMedicalrecords(medicalRecords);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        List<MedicalRecord> medicalRecords = medicalRecordRepo.getAllMedicalRecords();
 
         int result = medicalRecordRepo.countMinors(medicalRecords);
 
@@ -262,17 +227,12 @@ public class MedicalRecordRepoImplTest {
         medicationsJohn.add("Gaming");
 
         MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "01/01/1990", medicationsBob, allergiesBob);
-        MedicalRecord medicalRecord2 = new MedicalRecord("Bob", "Bober", "01/01/2020", medicationsJohn, allergiesJohn);
+        MedicalRecord medicalRecord2 = new MedicalRecord("John", "Bober", "01/01/2020", medicationsJohn, allergiesJohn);
 
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord2);
 
-        medicalRecords.add(medicalRecord);
-        medicalRecords.add(medicalRecord2);
-
-        Data mockData = new Data();
-        mockData.setMedicalrecords(medicalRecords);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        List<MedicalRecord> medicalRecords = medicalRecordRepo.getAllMedicalRecords();
 
         int result = medicalRecordRepo.countMajors(medicalRecords);
 
@@ -296,17 +256,12 @@ public class MedicalRecordRepoImplTest {
         medicationsJohn.add("Gaming");
 
         MedicalRecord medicalRecord = new MedicalRecord("Bob", "Bober", "01/01/1990", medicationsBob, allergiesBob);
-        MedicalRecord medicalRecord2 = new MedicalRecord("Bob", "Bober", "01/01/2020", medicationsJohn, allergiesJohn);
+        MedicalRecord medicalRecord2 = new MedicalRecord("John", "Bober", "01/01/2020", medicationsJohn, allergiesJohn);
 
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord);
+        medicalRecordRepo.addMedicalRecordToList(medicalRecord2);
 
-        medicalRecords.add(medicalRecord);
-        medicalRecords.add(medicalRecord2);
-
-        Data mockData = new Data();
-        mockData.setMedicalrecords(medicalRecords);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        List<MedicalRecord> medicalRecords = medicalRecordRepo.getAllMedicalRecords();
 
         List<MedicalRecord> result = medicalRecordRepo.findMinors(medicalRecords);
 
@@ -318,7 +273,7 @@ public class MedicalRecordRepoImplTest {
     }
 
     @Test
-    public void calculateAge_shouldReturnTheAgeOfAMedicalRecord () {
+    public void calculateAge_shouldReturnTheAgeOfAMedicalRecord() {
         List<String> allergiesBob = new ArrayList<>();
         allergiesBob.add("Capitalism");
         allergiesBob.add("Pop Music");

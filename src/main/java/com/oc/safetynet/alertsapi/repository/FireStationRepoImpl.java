@@ -2,12 +2,14 @@ package com.oc.safetynet.alertsapi.repository;
 
 import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.FireStation;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,29 +20,35 @@ public class FireStationRepoImpl implements FireStationRepo {
 
     private final DataRepository dataRepository;
 
+    private List<FireStation> fireStations = new ArrayList<>();
+
 
     @Autowired
     public FireStationRepoImpl(DataRepository dataRepository) {
         this.dataRepository = dataRepository;
     }
 
-
-    @Override
-    public List<FireStation> getAllFireStations() {
+    @PostConstruct
+    private void loadAllFireStations() {
         try {
             Data data = dataRepository.readData();
-            return data.getFirestations();
-        } catch (IOException e) {
+            fireStations = data.getFirestations();
+            if(fireStations != null) {
+                logger.info("Loaded List of FireStations from data {}.", fireStations);
+            }
+        } catch(IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
     }
 
+
+    @Override
+    public List<FireStation> getAllFireStations() {
+        return fireStations;
+    }
+
     @Override
     public FireStation addFireStationToList(FireStation fireStation) {
-        try {
-            Data data = dataRepository.readData();
-            List<FireStation> fireStations = getAllFireStations();
-
             boolean isDuplicateAddress = fireStations.stream()
                     .anyMatch(existingStation -> existingStation.getAddress().equals(fireStation.getAddress()));
 
@@ -48,24 +56,16 @@ public class FireStationRepoImpl implements FireStationRepo {
                 logger.error("FireStation with address {} already in DB", fireStation.getAddress());
             } else {
                 fireStations.add(fireStation);
-                data.setFireStations(fireStations);
                 logger.info("FireStation added: {}", fireStation);
-                logger.info("New List of FireStations: {}", data.getFirestations());
-                dataRepository.writeData(data);
+                logger.info("New List of FireStations: {}", fireStations);
                 return fireStation;
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
         return null;
     }
 
 
     @Override
     public void deleteFireStationByNumber(int station) {
-        try {
-            Data data = dataRepository.readData();
-            List<FireStation> fireStations = getAllFireStations();
             Optional<FireStation> removedFireStation = fireStations.stream()
                     .filter(fireStation -> fireStation.getStation() == station)
                     .findFirst();
@@ -74,23 +74,14 @@ public class FireStationRepoImpl implements FireStationRepo {
                 removedFireStation.ifPresent(fireStation -> logger.info("Firestation removed for address: {} and station number: {}",
                         fireStation.getAddress(), fireStation.getStation()));
                 fireStations.removeIf(fireStation -> fireStation.getStation() == station);
-                data.setFireStations(fireStations);
-                logger.info("New List of Firestations: {}", data.getFirestations());
-                dataRepository.writeData(data);
+                logger.info("New List of Firestations: {}", fireStations);
             } else {
                 logger.error("No Firestation was found for station {}", station);
             }
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
     }
 
     @Override
     public void deleteFireStationByAddress(String address) {
-        try {
-            Data data = dataRepository.readData();
-            List<FireStation> fireStations = getAllFireStations();
             Optional<FireStation> removedFireStation = fireStations.stream()
                     .filter(fireStation -> fireStation.getAddress().equals(address))
                     .findFirst();
@@ -99,55 +90,41 @@ public class FireStationRepoImpl implements FireStationRepo {
                 removedFireStation.ifPresent(fireStation -> logger.info("Firestation removed for address: {} and station number: {}",
                         fireStation.getAddress(), fireStation.getStation()));
                 fireStations.removeIf(fireStation -> fireStation.getAddress().equals(address));
-                data.setFireStations(fireStations);
-                logger.info("New List of Firestations: {}", data.getFirestations());
-                dataRepository.writeData(data);
+                logger.info("New List of Firestations: {}", fireStations);
             } else {
-                logger.error("No Firestation was found for address {}", address);
+                logger.error("No Firestation was found for address: {}", address);
             }
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
     }
 
     @Override
     public FireStation updateFireStationNumber(FireStation fireStation) {
+        Optional<FireStation> foundFireStation = fireStations.stream()
+                .filter(currentFireStation -> currentFireStation.getAddress().equals(fireStation.getAddress()))
+                .findFirst();
 
-        try {
-            Data data = dataRepository.readData();
-            List<FireStation> currentFireStations = getAllFireStations();
-            currentFireStations.stream()
-                    .filter(currentFireStation -> currentFireStation.getAddress().equals(fireStation.getAddress()))
-                    .findFirst()
-                    .ifPresent(foundFireStation -> {
-                        foundFireStation.setStation(fireStation.getStation());
-                    });
-            data.setFireStations(currentFireStations);
+        if (foundFireStation.isPresent()) {
+            foundFireStation.get().setStation(fireStation.getStation());
             logger.info("FireStation mapping modified: {}", fireStation);
-            logger.info("New List of FireStations: {}", data.getFirestations());
-
-            dataRepository.writeData(data);
+            logger.info("New List of FireStations: {}", fireStations);
             return fireStation;
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
+        } else {
+            logger.error("No Firestation was found for address: {}", fireStation.getAddress());
         }
+        return null;
     }
 
     @Override
     public List<String> findAddressesByStation(int station) {
-        return getAllFireStations().stream()
+        return fireStations.stream()
                 .filter(fireStation -> fireStation.getStation() == station)
                 .map(FireStation::getAddress).toList();
     }
 
     @Override
     public int findStationByAddress(String address) {
-        Optional<FireStation> fire = getAllFireStations().stream()
+        Optional<FireStation> fire = fireStations.stream()
                 .filter(fireStation -> fireStation.getAddress().equalsIgnoreCase(address))
                 .findFirst();
-
         return fire.map(FireStation::getStation).orElse(0);
     }
 }

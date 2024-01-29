@@ -1,11 +1,13 @@
 package com.oc.safetynet.alertsapi.model;
 
 import lombok.ToString;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @ToString
+@Component
 public class Data {
     private List<Person> persons;
     private List<FireStation> firestations;

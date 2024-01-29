@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class PersonRepoImplTest {
@@ -40,86 +39,60 @@ public class PersonRepoImplTest {
     }
 
     @Test
-    public void addPersonToList_ShouldAddPersonToList() throws IOException {
+    public void addPersonToList_ShouldAddPersonToList() {
         Person person = new Person("John", "Doe", "123 Main St", "123-456-7890", "john@example.com", "12345", "City");
-
-        Data mockData = new Data();
-
-        when(dataRepository.readData()).thenReturn(mockData);
-
         personRepo.addPersonToList(person);
 
-        assertEquals(1, mockData.getPersons().size());
-        assertEquals(person, mockData.getPersons().get(0));
+        List<Person> updatedPersons = personRepo.getAllPersons();
 
-        verify(dataRepository, times(1)).writeData(mockData);
+        assertEquals(1, updatedPersons.size());
+        assertEquals(person, updatedPersons.get(0));
     }
 
     @Test
-    public void deletePersonFromList_shouldDeletePersonFromList() throws IOException {
+    public void deletePersonFromList_shouldDeletePersonFromList() {
         Person person = new Person("John", "Doe", "123 Main St", "123-456-7890", "john@example.com", "12345", "City");
         Person person2 = new Person("Jane", "Doe", "123 Main St", "123-456-7890", "john@example.com", "12345", "City");
 
-        List<Person> persons = new ArrayList<>();
-        persons.add(person);
-        persons.add(person2);
-
-        Data mockData = new Data();
-        mockData.setPersons(persons);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        personRepo.addPersonToList(person);
+        personRepo.addPersonToList(person2);
 
         personRepo.deletePersonFromList(person.getFirstName(), person.getLastName());
 
-        assertEquals(1, mockData.getPersons().size());
-        assertEquals(person2, mockData.getPersons().get(0));
+        List<Person> updatedPersons = personRepo.getAllPersons();
+
+        assertEquals(1, updatedPersons.size());
+        assertEquals(person2, updatedPersons.get(0));
     }
 
     @Test
-    public void getAllPersons_IOExceptionThrown_ShouldThrowRuntimeException() throws IOException {
-        when(dataRepository.readData()).thenThrow(new IOException("Mocked IOException"));
-        assertThrows(RuntimeException.class, () -> personRepo.getAllPersons());
-    }
-
-    @Test
-    public void updatePerson_shouldUpdateAPerson() throws IOException {
+    public void updatePerson_shouldUpdateAPerson() {
 
         Person person = new Person("John", "Doe", "123 Main St", "City", "00000", "12345", "john@example.com");
         Person person2 = new Person("Jane", "Doe", "123 Main St", "City", "00000", "12345", "jane@example.com");
 
-        List<Person> persons = new ArrayList<>();
-        persons.add(person);
-        persons.add(person2);
-
-        Data mockData = new Data();
-        mockData.setPersons(persons);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        personRepo.addPersonToList(person);
+        personRepo.addPersonToList(person2);
 
         Person person3 = new Person("John", "Doe", "456 Main St", "City", "00000", "12345", "jane@example.com");
 
         personRepo.updatePerson(person3);
 
-        assertEquals(2, mockData.getPersons().size());
-        assertEquals("456 Main St", mockData.getPersons().get(0).getAddress());
+        List<Person> updatedPersons = personRepo.getAllPersons();
+
+        assertEquals(2, updatedPersons.size());
+        assertEquals("456 Main St", updatedPersons.get(0).getAddress());
     }
 
     @Test
-    public void findEmailsByCityTest() throws IOException {
+    public void findEmailsByCityTest() {
         Person person = new Person("John", "Doe", "123 Main St", "City", "00000", "12345", "john@example.com");
         Person person2 = new Person("Jane", "Doe", "123 Main St", "City", "00000", "12345", "jane@example.com");
 
-        List<Person> persons = new ArrayList<>();
-        persons.add(person);
-        persons.add(person2);
-
-        Data mockData = new Data();
-        mockData.setPersons(persons);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        personRepo.addPersonToList(person);
+        personRepo.addPersonToList(person2);
 
         String city = "city";
-
         List<String> result = personRepo.findEmailsByCity(city);
 
         assertEquals(2, result.size());
@@ -131,14 +104,8 @@ public class PersonRepoImplTest {
         Person person = new Person("John", "Doe", "123 Main St", "City", "00000", "12345", "john@example.com");
         Person person2 = new Person("John", "Doe", "456 Main St", "City", "00000", "12345", "jane@example.com");
 
-        List<Person> persons = new ArrayList<>();
-        persons.add(person);
-        persons.add(person2);
-
-        Data mockData = new Data();
-        mockData.setPersons(persons);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        personRepo.addPersonToList(person);
+        personRepo.addPersonToList(person2);
 
         String firstName = "John";
         String lastName = "Doe";
@@ -157,16 +124,10 @@ public class PersonRepoImplTest {
         Person person3 = new Person("John", "Smith", "456 Main St", "City", "00000", "12345", "john@example.com");
         Person person4 = new Person("Jane", "Smith", "456 Main St", "City", "00000", "12345", "jane@example.com");
 
-        List<Person> persons = new ArrayList<>();
-        persons.add(person);
-        persons.add(person2);
-        persons.add(person3);
-        persons.add(person4);
-
-        Data mockData = new Data();
-        mockData.setPersons(persons);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        personRepo.addPersonToList(person);
+        personRepo.addPersonToList(person2);
+        personRepo.addPersonToList(person3);
+        personRepo.addPersonToList(person4);
 
         String address1 = "123 Main St";
         String address2 = "456 Main St";
@@ -191,16 +152,10 @@ public class PersonRepoImplTest {
         Person person3 = new Person("John", "Smith", "456 Main St", "City", "00000", "12345", "john@example.com");
         Person person4 = new Person("Jane", "Smith", "456 Main St", "City", "00000", "12345", "jane@example.com");
 
-        List<Person> persons = new ArrayList<>();
-        persons.add(person);
-        persons.add(person2);
-        persons.add(person3);
-        persons.add(person4);
-
-        Data mockData = new Data();
-        mockData.setPersons(persons);
-
-        when(dataRepository.readData()).thenReturn(mockData);
+        personRepo.addPersonToList(person);
+        personRepo.addPersonToList(person2);
+        personRepo.addPersonToList(person3);
+        personRepo.addPersonToList(person4);
 
         String address1 = "123 Main St";
 

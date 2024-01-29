@@ -2,6 +2,7 @@ package com.oc.safetynet.alertsapi.repository;
 
 import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +21,8 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
 
     private static final Logger logger = LoggerFactory.getLogger(MedicalRecordRepoImpl.class);
 
+    private List<MedicalRecord> medicalRecords = new ArrayList<>();
+
     private final DataRepository dataRepository;
 
     @Autowired
@@ -26,24 +30,27 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
         this.dataRepository = dataRepository;
     }
 
-
-    @Override
-    public List<MedicalRecord> getAllMedicalRecords() {
+    @PostConstruct
+    private void loadAllMedicalRecords() {
         try {
             Data data = dataRepository.readData();
-            return data.getMedicalrecords();
-
+            medicalRecords = data.getMedicalrecords();
+            if(medicalRecords !=null) {
+                logger.info("Loaded List of medical records from data {}.", medicalRecords);
+            }
         } catch (IOException e) {
             throw new RuntimeException("Failed to read data from the repository", e);
         }
     }
 
+
+    @Override
+    public List<MedicalRecord> getAllMedicalRecords() {
+        return medicalRecords;
+    }
+
     @Override
     public MedicalRecord addMedicalRecordToList(MedicalRecord medicalRecord) {
-        try {
-            Data data = dataRepository.readData();
-            List<MedicalRecord> medicalRecords = getAllMedicalRecords();
-
             boolean isDuplicate = medicalRecords.stream()
                     .anyMatch(existingRecord ->
                             existingRecord.getFirstName().equals(medicalRecord.getFirstName()) &&
@@ -52,24 +59,15 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
                 logger.error("MedicalRecord with first name {} and last name {} already exists in the database", medicalRecord.getFirstName(), medicalRecord.getLastName());
             } else {
                 medicalRecords.add(medicalRecord);
-                data.setMedicalrecords(medicalRecords);
                 logger.info("Medical Record added: {}", medicalRecord);
-                logger.info("New List of Medical Records: {}", data.getMedicalrecords());
-                dataRepository.writeData(data);
+                logger.info("New List of Medical Records: {}", medicalRecords);
                 return medicalRecord;
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
         return null;
     }
 
     @Override
     public void deleteMedicalRecordFromList(String firstName, String lastName) {
-        try {
-            Data data = dataRepository.readData();
-            List<MedicalRecord> medicalRecords = getAllMedicalRecords();
-
             Optional<MedicalRecord> removedMedicalRecord = medicalRecords.stream()
                     .filter(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName))
                     .findFirst();
@@ -78,25 +76,14 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
                 removedMedicalRecord.ifPresent(medicalRecord -> logger.info("Medical Record removed for: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName()));
 
                 medicalRecords.removeIf(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName));
-                data.setMedicalrecords(medicalRecords);
-                logger.info("New List of Medical Records: {}", data.getMedicalrecords());
-                dataRepository.writeData(data);
             } else {
                 logger.error("Medical Record not found for: {} {}", firstName, lastName);
             }
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
     }
 
     @Override
     public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord) {
-        try {
-            Data data = dataRepository.readData();
-            List<MedicalRecord> currentMedicalRecords = getAllMedicalRecords();
-
-            Optional<MedicalRecord> foundMedicalRecord = currentMedicalRecords.stream()
+            Optional<MedicalRecord> foundMedicalRecord = medicalRecords.stream()
                     .filter(currentMedicalRecord ->
                             currentMedicalRecord.getFirstName().equals(medicalRecord.getFirstName()) &&
                                     currentMedicalRecord.getLastName().equals(medicalRecord.getLastName()))
@@ -110,33 +97,26 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
                     existingRecord.setAllergies(medicalRecord.getAllergies());
                     existingRecord.setMedications(medicalRecord.getMedications());
                 });
-
-                data.setMedicalrecords(currentMedicalRecords);
                 logger.info("Medical Record modified: {}", medicalRecord);
-                logger.info("New List of Medical Records: {}", data.getMedicalrecords());
-                dataRepository.writeData(data);
+                logger.info("New List of Medical Records: {}", medicalRecords);
                 return medicalRecord;
 
             } else {
                 logger.error("Medical Record not found for: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
             }
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
-        }
         return null;
     }
 
     @Override
     public List<MedicalRecord> findAllByFirstNameAndLastName(String firstName, String lastName) {
-        return getAllMedicalRecords().stream()
+        return medicalRecords.stream()
                 .filter(medicalRecord -> medicalRecord.getFirstName().equalsIgnoreCase(firstName) && medicalRecord.getLastName().equalsIgnoreCase(lastName))
                 .toList();
     }
 
     @Override
     public MedicalRecord findByFirstNameAndLastName(String firstName, String lastName) {
-        return getAllMedicalRecords().stream()
+        return medicalRecords.stream()
                 .filter(medicalRecord -> medicalRecord.getFirstName().equalsIgnoreCase(firstName) && medicalRecord.getLastName().equalsIgnoreCase(lastName))
                 .findFirst()
                 .orElse(null);

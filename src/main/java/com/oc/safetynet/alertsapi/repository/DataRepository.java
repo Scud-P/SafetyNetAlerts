@@ -35,18 +35,6 @@ public class DataRepository {
         }
     }
 
-    public void writeData(Data data) throws IOException {
-        objectMapper = new ObjectMapper();
-
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        logger.info("Writing data to file: {}", dataFilePath);
-
-        try (OutputStream outputStream = new FileOutputStream(dataFilePath)) {
-            objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-            objectMapper.writeValue(outputStream, data);
-        }
-    }
-
     private InputStream getResourceInputStream() throws IOException {
         if (dataFilePath.startsWith("classpath:")) {
             return dataResource.getInputStream();
