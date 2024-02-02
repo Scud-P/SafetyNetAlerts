@@ -18,5 +18,4 @@ public interface FireStationRepo {
     List<String> findAddressesByStation(int station);
 
     int findStationByAddress(String address);
-
 }

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,14 +29,10 @@ public class FireStationRepoImpl implements FireStationRepo {
 
     @PostConstruct
     private void loadAllFireStations() {
-        try {
-            Data data = dataRepository.readData();
-            fireStations = data.getFirestations();
-            if(fireStations != null) {
-                logger.info("Loaded List of FireStations from data {}.", fireStations);
-            }
-        } catch(IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
+        Data data = dataRepository.readData();
+        fireStations = data.getFirestations();
+        if (fireStations != null) {
+            logger.info("Loaded List of FireStations from data {}.", fireStations);
         }
     }
 
@@ -49,51 +44,51 @@ public class FireStationRepoImpl implements FireStationRepo {
 
     @Override
     public FireStation addFireStationToList(FireStation fireStation) {
-            boolean isDuplicateAddress = fireStations.stream()
-                    .anyMatch(existingStation -> existingStation.getAddress().equals(fireStation.getAddress()));
+        boolean isDuplicateAddress = fireStations.stream()
+                .anyMatch(existingStation -> existingStation.getAddress().equals(fireStation.getAddress()));
 
-            if (isDuplicateAddress) {
-                logger.error("FireStation with address {} already in DB", fireStation.getAddress());
-            } else {
-                fireStations.add(fireStation);
-                logger.info("FireStation added: {}", fireStation);
-                logger.info("New List of FireStations: {}", fireStations);
-                return fireStation;
-            }
+        if (isDuplicateAddress) {
+            logger.error("FireStation with address {} already in DB", fireStation.getAddress());
+        } else {
+            fireStations.add(fireStation);
+            logger.info("FireStation added: {}", fireStation);
+            logger.info("New List of FireStations: {}", fireStations);
+            return fireStation;
+        }
         return null;
     }
 
 
     @Override
     public void deleteFireStationByNumber(int station) {
-            Optional<FireStation> removedFireStation = fireStations.stream()
-                    .filter(fireStation -> fireStation.getStation() == station)
-                    .findFirst();
+        Optional<FireStation> removedFireStation = fireStations.stream()
+                .filter(fireStation -> fireStation.getStation() == station)
+                .findFirst();
 
-            if (removedFireStation.isPresent()) {
-                removedFireStation.ifPresent(fireStation -> logger.info("Firestation removed for address: {} and station number: {}",
-                        fireStation.getAddress(), fireStation.getStation()));
-                fireStations.removeIf(fireStation -> fireStation.getStation() == station);
-                logger.info("New List of Firestations: {}", fireStations);
-            } else {
-                logger.error("No Firestation was found for station {}", station);
-            }
+        if (removedFireStation.isPresent()) {
+            removedFireStation.ifPresent(fireStation -> logger.info("Firestation removed for address: {} and station number: {}",
+                    fireStation.getAddress(), fireStation.getStation()));
+            fireStations.removeIf(fireStation -> fireStation.getStation() == station);
+            logger.info("New List of Firestations: {}", fireStations);
+        } else {
+            logger.error("No Firestation was found for station {}", station);
+        }
     }
 
     @Override
     public void deleteFireStationByAddress(String address) {
-            Optional<FireStation> removedFireStation = fireStations.stream()
-                    .filter(fireStation -> fireStation.getAddress().equals(address))
-                    .findFirst();
+        Optional<FireStation> removedFireStation = fireStations.stream()
+                .filter(fireStation -> fireStation.getAddress().equals(address))
+                .findFirst();
 
-            if (removedFireStation.isPresent()) {
-                removedFireStation.ifPresent(fireStation -> logger.info("Firestation removed for address: {} and station number: {}",
-                        fireStation.getAddress(), fireStation.getStation()));
-                fireStations.removeIf(fireStation -> fireStation.getAddress().equals(address));
-                logger.info("New List of Firestations: {}", fireStations);
-            } else {
-                logger.error("No Firestation was found for address: {}", address);
-            }
+        if (removedFireStation.isPresent()) {
+            removedFireStation.ifPresent(fireStation -> logger.info("Firestation removed for address: {} and station number: {}",
+                    fireStation.getAddress(), fireStation.getStation()));
+            fireStations.removeIf(fireStation -> fireStation.getAddress().equals(address));
+            logger.info("New List of Firestations: {}", fireStations);
+        } else {
+            logger.error("No Firestation was found for address: {}", address);
+        }
     }
 
     @Override

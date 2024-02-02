@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -32,14 +31,10 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
 
     @PostConstruct
     private void loadAllMedicalRecords() {
-        try {
-            Data data = dataRepository.readData();
-            medicalRecords = data.getMedicalrecords();
-            if(medicalRecords !=null) {
-                logger.info("Loaded List of medical records from data {}.", medicalRecords);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read data from the repository", e);
+        Data data = dataRepository.readData();
+        medicalRecords = data.getMedicalrecords();
+        if (medicalRecords != null) {
+            logger.info("Loaded List of medical records from data {}.", medicalRecords);
         }
     }
 
@@ -51,59 +46,59 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
 
     @Override
     public MedicalRecord addMedicalRecordToList(MedicalRecord medicalRecord) {
-            boolean isDuplicate = medicalRecords.stream()
-                    .anyMatch(existingRecord ->
-                            existingRecord.getFirstName().equals(medicalRecord.getFirstName()) &&
-                                    existingRecord.getLastName().equals(medicalRecord.getLastName()));
-            if (isDuplicate) {
-                logger.error("MedicalRecord with first name {} and last name {} already exists in the database", medicalRecord.getFirstName(), medicalRecord.getLastName());
-            } else {
-                medicalRecords.add(medicalRecord);
-                logger.info("Medical Record added: {}", medicalRecord);
-                logger.info("New List of Medical Records: {}", medicalRecords);
-                return medicalRecord;
-            }
+        boolean isDuplicate = medicalRecords.stream()
+                .anyMatch(existingRecord ->
+                        existingRecord.getFirstName().equals(medicalRecord.getFirstName()) &&
+                                existingRecord.getLastName().equals(medicalRecord.getLastName()));
+        if (isDuplicate) {
+            logger.error("MedicalRecord with first name {} and last name {} already exists in the database", medicalRecord.getFirstName(), medicalRecord.getLastName());
+        } else {
+            medicalRecords.add(medicalRecord);
+            logger.info("Medical Record added: {}", medicalRecord);
+            logger.info("New List of Medical Records: {}", medicalRecords);
+            return medicalRecord;
+        }
         return null;
     }
 
     @Override
     public void deleteMedicalRecordFromList(String firstName, String lastName) {
-            Optional<MedicalRecord> removedMedicalRecord = medicalRecords.stream()
-                    .filter(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName))
-                    .findFirst();
+        Optional<MedicalRecord> removedMedicalRecord = medicalRecords.stream()
+                .filter(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName))
+                .findFirst();
 
-            if (removedMedicalRecord.isPresent()) {
-                removedMedicalRecord.ifPresent(medicalRecord -> logger.info("Medical Record removed for: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName()));
+        if (removedMedicalRecord.isPresent()) {
+            removedMedicalRecord.ifPresent(medicalRecord -> logger.info("Medical Record removed for: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName()));
 
-                medicalRecords.removeIf(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName));
-            } else {
-                logger.error("Medical Record not found for: {} {}", firstName, lastName);
-            }
+            medicalRecords.removeIf(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName));
+        } else {
+            logger.error("Medical Record not found for: {} {}", firstName, lastName);
+        }
     }
 
     @Override
     public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord) {
-            Optional<MedicalRecord> foundMedicalRecord = medicalRecords.stream()
-                    .filter(currentMedicalRecord ->
-                            currentMedicalRecord.getFirstName().equals(medicalRecord.getFirstName()) &&
-                                    currentMedicalRecord.getLastName().equals(medicalRecord.getLastName()))
-                    .findFirst();
+        Optional<MedicalRecord> foundMedicalRecord = medicalRecords.stream()
+                .filter(currentMedicalRecord ->
+                        currentMedicalRecord.getFirstName().equals(medicalRecord.getFirstName()) &&
+                                currentMedicalRecord.getLastName().equals(medicalRecord.getLastName()))
+                .findFirst();
 
-            if (foundMedicalRecord.isPresent()) {
-                foundMedicalRecord.ifPresent(existingRecord -> {
-                    existingRecord.setFirstName(medicalRecord.getFirstName());
-                    existingRecord.setLastName(medicalRecord.getLastName());
-                    existingRecord.setBirthdate(medicalRecord.getBirthdate());
-                    existingRecord.setAllergies(medicalRecord.getAllergies());
-                    existingRecord.setMedications(medicalRecord.getMedications());
-                });
-                logger.info("Medical Record modified: {}", medicalRecord);
-                logger.info("New List of Medical Records: {}", medicalRecords);
-                return medicalRecord;
+        if (foundMedicalRecord.isPresent()) {
+            foundMedicalRecord.ifPresent(existingRecord -> {
+                existingRecord.setFirstName(medicalRecord.getFirstName());
+                existingRecord.setLastName(medicalRecord.getLastName());
+                existingRecord.setBirthdate(medicalRecord.getBirthdate());
+                existingRecord.setAllergies(medicalRecord.getAllergies());
+                existingRecord.setMedications(medicalRecord.getMedications());
+            });
+            logger.info("Medical Record modified: {}", medicalRecord);
+            logger.info("New List of Medical Records: {}", medicalRecords);
+            return medicalRecord;
 
-            } else {
-                logger.error("Medical Record not found for: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
-            }
+        } else {
+            logger.error("Medical Record not found for: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
+        }
         return null;
     }
 

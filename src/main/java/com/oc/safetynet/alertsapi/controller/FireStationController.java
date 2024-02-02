@@ -5,19 +5,11 @@ import com.oc.safetynet.alertsapi.repository.FireStationRepoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.List;
-
 @RestController
 public class FireStationController {
 
     @Autowired
     FireStationRepoImpl fireStationRepoImpl;
-
-    @GetMapping("/firestations")
-    public List<FireStation> getAllFireStations() {
-        return fireStationRepoImpl.getAllFireStations();
-    }
 
     @PostMapping("/firestation")
     public FireStation addFireStation(@RequestBody FireStation fireStation) {

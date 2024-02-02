@@ -1,7 +1,6 @@
 package com.oc.safetynet.alertsapi.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.oc.safetynet.alertsapi.model.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +13,9 @@ import java.io.*;
 @Repository
 public class DataRepository {
 
-    private ObjectMapper objectMapper;
-
     private static final Logger logger = LoggerFactory.getLogger(DataRepository.class);
+
+    private ObjectMapper objectMapper;
 
     public DataRepository(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -25,21 +24,13 @@ public class DataRepository {
     @Value("classpath:data.json")
     private Resource dataResource;
 
-    @Value("${data.file.path}")
-    private String dataFilePath;
-
-    public Data readData() throws IOException {
+    public Data readData() {
         objectMapper = new ObjectMapper();
-        try (InputStream inputStream = getResourceInputStream()) {
+        try (InputStream inputStream = dataResource.getInputStream()) {
             return objectMapper.readValue(inputStream, Data.class);
-        }
-    }
-
-    private InputStream getResourceInputStream() throws IOException {
-        if (dataFilePath.startsWith("classpath:")) {
-            return dataResource.getInputStream();
-        } else {
-            return new FileInputStream(dataFilePath);
+        } catch (IOException e) {
+            logger.error("Error reading data from resource: {}", e.getMessage());
+            return null;
         }
     }
 }

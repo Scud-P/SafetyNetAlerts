@@ -20,5 +20,4 @@ public interface PersonRepo {
     List<Person> findPersonsByAddresses(List<String> addresses);
 
     List<Person> findPersonsByAddress(String address);
-
 }

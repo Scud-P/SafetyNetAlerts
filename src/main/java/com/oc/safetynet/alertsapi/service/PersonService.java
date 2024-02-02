@@ -1,6 +1,5 @@
 package com.oc.safetynet.alertsapi.service;
 
-import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
 import com.oc.safetynet.alertsapi.model.Person;
 import com.oc.safetynet.alertsapi.model.dto.*;
@@ -16,7 +15,6 @@ import java.util.*;
 public class PersonService {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
-    private static Data data;
 
     @Autowired
     private PersonRepoImpl personRepoImpl;
@@ -26,9 +24,6 @@ public class PersonService {
 
     @Autowired
     private FireStationRepoImpl fireStationRepoImpl;
-
-    @Autowired
-    private DataRepository dataRepository;
 
     public List<PersonInfoDTO> findPersonInfoListDTO(String firstName, String lastName) {
 
@@ -159,5 +154,4 @@ public class PersonService {
         return person.getFirstName().equalsIgnoreCase(medicalRecord.getFirstName()) &&
                 person.getLastName().equalsIgnoreCase(medicalRecord.getLastName());
     }
-
 }

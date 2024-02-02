@@ -26,5 +26,4 @@ public interface MedicalRecordRepo {
     List<MedicalRecord> findMinors(List<MedicalRecord> medicalRecords);
 
     int calculateAge(MedicalRecord medicalRecord);
-
 }
