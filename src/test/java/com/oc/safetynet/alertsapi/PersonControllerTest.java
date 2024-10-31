@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oc.safetynet.alertsapi.controller.PersonController;
 import com.oc.safetynet.alertsapi.model.Person;
 import com.oc.safetynet.alertsapi.model.dto.*;
-import com.oc.safetynet.alertsapi.repository.DataRepository;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import com.oc.safetynet.alertsapi.repository.PersonRepoImpl;
 import com.oc.safetynet.alertsapi.service.PersonService;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ public class PersonControllerTest {
     private PersonRepoImpl personRepoImpl;
 
     @Autowired
-    private DataRepository dataRepository;
+    private JsonReaderService jsonReaderService;
 
     @Test
     public void testAddPerson() throws Exception {

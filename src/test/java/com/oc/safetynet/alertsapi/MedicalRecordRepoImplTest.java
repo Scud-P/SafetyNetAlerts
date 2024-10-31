@@ -1,9 +1,8 @@
 package com.oc.safetynet.alertsapi;
 
 import com.oc.safetynet.alertsapi.model.Data;
-import com.oc.safetynet.alertsapi.model.FireStation;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
-import com.oc.safetynet.alertsapi.repository.DataRepository;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepoImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class MedicalRecordRepoImplTest {
 
     @Mock
-    private DataRepository dataRepository;
+    private JsonReaderService jsonReaderService;
 
     @InjectMocks
     private MedicalRecordRepoImpl medicalRecordRepo;
@@ -34,7 +33,7 @@ public class MedicalRecordRepoImplTest {
     @Test
     public void getAllMedicalRecords_ShouldReturnListOfMedicalRecords() throws IOException {
         List<MedicalRecord> mockMedicalRecords = new ArrayList<>();
-        when(dataRepository.readData()).thenReturn(new Data());
+        when(jsonReaderService.readData()).thenReturn(new Data());
         List<MedicalRecord> result = medicalRecordRepo.getAllMedicalRecords();
         assertEquals(mockMedicalRecords, result);
     }

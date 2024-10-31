@@ -2,6 +2,7 @@ package com.oc.safetynet.alertsapi.repository;
 
 import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.FireStation;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,19 +18,18 @@ public class FireStationRepoImpl implements FireStationRepo {
 
     private static final Logger logger = LoggerFactory.getLogger(FireStationRepoImpl.class);
 
-    private final DataRepository dataRepository;
+    private final Data data;
 
     private List<FireStation> fireStations = new ArrayList<>();
 
 
     @Autowired
-    public FireStationRepoImpl(DataRepository dataRepository) {
-        this.dataRepository = dataRepository;
+    public FireStationRepoImpl(JsonReaderService jsonReaderService, Data data) {
+        this.data = jsonReaderService.readData();
     }
 
     @PostConstruct
     private void loadAllFireStations() {
-        Data data = dataRepository.readData();
         fireStations = data.getFirestations();
         if (fireStations != null) {
             logger.info("Loaded List of FireStations from data {}.", fireStations);
@@ -57,7 +57,6 @@ public class FireStationRepoImpl implements FireStationRepo {
         }
         return null;
     }
-
 
     @Override
     public void deleteFireStationByNumber(int station) {

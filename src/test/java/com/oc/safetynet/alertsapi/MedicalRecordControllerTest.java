@@ -3,7 +3,7 @@ package com.oc.safetynet.alertsapi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oc.safetynet.alertsapi.controller.MedicalRecordController;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
-import com.oc.safetynet.alertsapi.repository.DataRepository;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import com.oc.safetynet.alertsapi.repository.MedicalRecordRepoImpl;
 import com.oc.safetynet.alertsapi.service.PersonService;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ public class MedicalRecordControllerTest {
     private MedicalRecordRepoImpl medicalRecordRepoImpl;
 
     @Autowired
-    private DataRepository dataRepository;
+    private JsonReaderService jsonReaderService;
 
     @Test
     public void testAddMedicalRecord() throws Exception {

@@ -2,7 +2,7 @@ package com.oc.safetynet.alertsapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oc.safetynet.alertsapi.model.FireStation;
-import com.oc.safetynet.alertsapi.repository.DataRepository;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import com.oc.safetynet.alertsapi.repository.FireStationRepoImpl;
 import com.oc.safetynet.alertsapi.service.PersonService;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ public class FireStationControllerTest {
     private FireStationRepoImpl fireStationRepoImpl;
 
     @Autowired
-    private DataRepository dataRepository;
+    private JsonReaderService jsonReaderService;
 
     @Test
     public void testAddFireStation() throws Exception {

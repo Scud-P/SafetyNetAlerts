@@ -2,6 +2,7 @@ package com.oc.safetynet.alertsapi.repository;
 
 import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.MedicalRecord;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +23,15 @@ public class MedicalRecordRepoImpl implements MedicalRecordRepo {
 
     private List<MedicalRecord> medicalRecords = new ArrayList<>();
 
-    private final DataRepository dataRepository;
+    private final Data data;
 
     @Autowired
-    public MedicalRecordRepoImpl(DataRepository dataRepository) {
-        this.dataRepository = dataRepository;
+    public MedicalRecordRepoImpl(JsonReaderService jsonReaderService, Data data) {
+        this.data = jsonReaderService.readData();
     }
 
     @PostConstruct
     private void loadAllMedicalRecords() {
-        Data data = dataRepository.readData();
         medicalRecords = data.getMedicalrecords();
         if (medicalRecords != null) {
             logger.info("Loaded List of medical records from data {}.", medicalRecords);

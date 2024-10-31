@@ -2,6 +2,7 @@ package com.oc.safetynet.alertsapi.repository;
 
 import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.Person;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,16 +20,15 @@ public class PersonRepoImpl implements PersonRepo {
 
     private List<Person> persons = new ArrayList<>();
 
-    private final DataRepository dataRepository;
+    private final Data data;
 
     @Autowired
-    public PersonRepoImpl(DataRepository dataRepository) {
-        this.dataRepository = dataRepository;
+    public PersonRepoImpl(JsonReaderService jsonReaderService, Data data) {
+        this.data = jsonReaderService.readData();
     }
 
     @PostConstruct
     private void loadAllPersons() {
-        Data data = dataRepository.readData();
         persons = data.getPersons();
         if (persons != null) {
             logger.info("Loaded List of persons from data {}.", persons);

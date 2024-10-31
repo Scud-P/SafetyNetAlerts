@@ -2,7 +2,7 @@ package com.oc.safetynet.alertsapi;
 
 import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.FireStation;
-import com.oc.safetynet.alertsapi.repository.DataRepository;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import com.oc.safetynet.alertsapi.repository.FireStationRepoImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class FireStationRepoImplTest {
 
     @Mock
-    private DataRepository dataRepository;
+    private JsonReaderService jsonReaderService;
 
     @InjectMocks
     private FireStationRepoImpl fireStationRepo;
@@ -33,7 +33,7 @@ public class FireStationRepoImplTest {
     @Test
     public void getAllFireStations_ShouldReturnListOfFireStations() throws IOException {
         List<FireStation> mockFireStations = new ArrayList<>();
-        when(dataRepository.readData()).thenReturn(new Data());
+        when(jsonReaderService.readData()).thenReturn(new Data());
         List<FireStation> result = fireStationRepo.getAllFireStations();
         assertEquals(mockFireStations, result);
     }

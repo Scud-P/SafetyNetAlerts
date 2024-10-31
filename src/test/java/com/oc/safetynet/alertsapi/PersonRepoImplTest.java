@@ -2,7 +2,7 @@ package com.oc.safetynet.alertsapi;
 
 import com.oc.safetynet.alertsapi.model.Data;
 import com.oc.safetynet.alertsapi.model.Person;
-import com.oc.safetynet.alertsapi.repository.DataRepository;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import com.oc.safetynet.alertsapi.repository.PersonRepoImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class PersonRepoImplTest {
 
     @Mock
-    private DataRepository dataRepository;
+    private JsonReaderService jsonReaderService;
 
     @InjectMocks
     private PersonRepoImpl personRepo;
@@ -33,7 +33,7 @@ public class PersonRepoImplTest {
     @Test
     public void getAllPersons_ShouldReturnListOfPersons() throws IOException {
         List<Person> mockPersons = new ArrayList<>();
-        when(dataRepository.readData()).thenReturn(new Data());
+        when(jsonReaderService.readData()).thenReturn(new Data());
         List<Person> result = personRepo.getAllPersons();
         assertEquals(mockPersons, result);
     }

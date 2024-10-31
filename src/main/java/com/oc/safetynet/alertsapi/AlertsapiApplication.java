@@ -1,8 +1,7 @@
 package com.oc.safetynet.alertsapi;
 
-import com.oc.safetynet.alertsapi.repository.DataRepository;
+import com.oc.safetynet.alertsapi.service.JsonReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.PropertySource;
@@ -10,17 +9,13 @@ import org.springframework.context.annotation.PropertySource;
 @SpringBootApplication(scanBasePackages = "com.oc.safetynet.alertsapi")
 @PropertySource("classpath:application.properties")
 
-public class AlertsapiApplication implements CommandLineRunner {
+public class AlertsapiApplication {
 
-	@Autowired
-	private DataRepository dataRepository;
+    @Autowired
+    private JsonReaderService jsonReaderService;
 
-	public static void main(String[] args) {
-		SpringApplication.run(AlertsapiApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(AlertsapiApplication.class, args);
+    }
 
-	@Override
-	public void run(String... args) {
-		dataRepository.readData();
-	}
 }
